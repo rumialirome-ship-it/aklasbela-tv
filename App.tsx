@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Role, User, Dealer, Admin, Game, Bet, LedgerEntry, SubGameType, PrizeRates } from './types';
 import { Icons, GAME_LOGOS } from './constants';
@@ -20,7 +19,7 @@ const Header: React.FC = () => {
     };
 
     return (
-        <header className="sticky top-0 z-40 bg-black/40 backdrop-blur-2xl border-b border-rose-900/20">
+        <header className="sticky top-0 z-40 bg-black/60 backdrop-blur-2xl border-b border-rose-900/20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
                 <div className="flex items-center gap-4">
                     {account.avatarUrl ? (
@@ -31,7 +30,7 @@ const Header: React.FC = () => {
                         </div>
                     )}
                     <div>
-                        <h1 className="text-xl font-black glitch-text hidden md:block tracking-tighter" data-text="AKLASBELA-TV">AKLASBELA-TV</h1>
+                        <h1 className="text-xl font-black hidden md:block tracking-tighter uppercase">AKLASBELA-TV</h1>
                          <div className="flex items-center text-[10px] mt-1">
                             <span className={`px-2 py-0.5 rounded-full font-black uppercase tracking-widest mr-2 border ${roleColors[role] || 'bg-slate-700'}`}>{role}</span>
                             <span className="text-rose-100/60 font-bold tracking-[0.2em] uppercase">{account.name || 'TERMINAL'}</span>
@@ -41,11 +40,11 @@ const Header: React.FC = () => {
                 <div className="flex items-center space-x-6">
                      { typeof account.wallet === 'number' && (
                         <div className="hidden md:flex items-center bg-black/20 px-5 py-2.5 rounded-xl border border-rose-900/30 shadow-inner">
-                            <span className="h-6 w-6 mr-3 text-red-600">{Icons.wallet}</span>
+                            <span className="h-4 w-4 mr-3 text-red-600">{Icons.wallet}</span>
                             <span className="font-black text-rose-50 text-xl tracking-tight font-mono">PKR {account.wallet.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                         </div>
                     )}
-                    <button onClick={logout} className="bg-red-950/20 border border-red-900/50 hover:bg-red-600 hover:text-white text-red-500 font-black px-6 py-2.5 rounded-xl transition-all duration-500 text-xs uppercase tracking-widest">Logout</button>
+                    <button onClick={logout} className="bg-red-950/20 border border-red-900/50 hover:bg-red-600 hover:text-white text-red-500 font-black px-6 py-2.5 rounded-xl transition-all duration-500 text-[10px] uppercase tracking-widest">Logout</button>
                 </div>
             </div>
         </header>
@@ -62,6 +61,10 @@ const AppContent: React.FC = () => {
     
     const [activeReveal, setActiveReveal] = useState<{ name: string; number: string } | null>(null);
     const lastGamesRef = useRef<Game[]>([]);
+
+    useEffect(() => {
+        document.title = role ? `Terminal | AKLASBELA-TV` : `AKLASBELA-TV | Digital Exchange`;
+    }, [role]);
 
     const parseAllDates = (data: any) => {
         if (!data) return data;
@@ -157,12 +160,17 @@ const AppContent: React.FC = () => {
         fetchPrivateData();
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center text-rose-500 text-2xl font-black uppercase tracking-[0.5em] animate-pulse">Syncing...</div>;
+    if (loading) return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-[#0a0202]">
+            <div className="text-rose-500 text-2xl font-black uppercase tracking-[0.5em] animate-pulse mb-4">AKLASBELA-TV</div>
+            <div className="text-rose-900 text-[10px] font-black uppercase tracking-[0.2em]">Synchronizing Network...</div>
+        </div>
+    );
 
     const visibleGames = role === Role.Admin ? games : games.filter(g => g.isActive);
 
     return (
-        <div className="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
+        <div className="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white bg-[#0a0202]">
             {!role || !account ? (
                 <LandingPage games={games.filter(g => g.isActive)} />
             ) : (
