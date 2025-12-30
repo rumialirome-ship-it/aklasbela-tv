@@ -82,6 +82,7 @@ const findAccountById = (id, table) => {
             account.ledger = db.prepare('SELECT * FROM ledgers WHERE LOWER(accountId) = LOWER(?) ORDER BY timestamp ASC').all(id);
         } else {
             account.isMarketOpen = isGameOpen(account.drawTime);
+            account.isActive = !!account.isActive;
         }
         if (account.prizeRates) account.prizeRates = JSON.parse(account.prizeRates);
         if (account.betLimits) account.betLimits = JSON.parse(account.betLimits);
@@ -114,7 +115,10 @@ const getAllFromTable = (table, withLedger = false) => {
     return db.prepare(`SELECT * FROM ${table}`).all().map(acc => {
         try {
             if (withLedger && acc.id) acc.ledger = db.prepare('SELECT * FROM ledgers WHERE LOWER(accountId) = LOWER(?) ORDER BY timestamp ASC').all(acc.id);
-            if (table === 'games' && acc.drawTime) acc.isMarketOpen = isGameOpen(acc.drawTime);
+            if (table === 'games' && acc.drawTime) {
+                acc.isMarketOpen = isGameOpen(acc.drawTime);
+                acc.isActive = !!acc.isActive;
+            }
             if (acc.prizeRates) acc.prizeRates = JSON.parse(acc.prizeRates);
             if (acc.betLimits) acc.betLimits = JSON.parse(acc.betLimits);
             if (table === 'bets' && acc.numbers) acc.numbers = JSON.parse(acc.numbers);
@@ -352,6 +356,13 @@ const toggleUserRestrictionByDealer = (uId, dId) => {
     return findAccountById(uId, 'users');
 };
 
+const toggleGameStatus = (gameId) => {
+    const game = db.prepare('SELECT isActive FROM games WHERE id = ?').get(gameId);
+    if (!game) throw { status: 404, message: 'Game not found.' };
+    db.prepare('UPDATE games SET isActive = ? WHERE id = ?').run(game.isActive ? 0 : 1, gameId);
+    return findAccountById(gameId, 'games');
+};
+
 const createBet = (b) => db.prepare('INSERT INTO bets (id, userId, dealerId, gameId, subGameType, numbers, amountPerNumber, totalAmount, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)').run(b.id, b.userId, b.dealerId, b.gameId, b.subGameType, b.numbers, b.amountPerNumber, b.totalAmount, b.timestamp);
 
 const getNumberStakeSummary = ({ gameId, dealerId, date }) => {
@@ -488,5 +499,5 @@ function resetAllGames() {
 }
 
 module.exports = {
-    connect, verifySchema, findAccountById, findAccountForLogin, updatePassword, getAllFromTable, runInTransaction, addLedgerEntry, createDealer, updateDealer, findUsersByDealerId, findUserByDealer, findBetsByUserId, createUser, updateUser, updateUserByAdmin, deleteUserByDealer, toggleAccountRestrictionByAdmin, toggleUserRestrictionByDealer, declareWinnerForGame, updateWinningNumber, approvePayoutsForGame, getFinancialSummary, getNumberStakeSummary, placeBulkBets, updateGameDrawTime, resetAllGames, getAllNumberLimits, saveNumberLimit, deleteNumberLimit, findBetsByDealerId, findBetsByGameId
+    connect, verifySchema, findAccountById, findAccountForLogin, updatePassword, getAllFromTable, runInTransaction, addLedgerEntry, createDealer, updateDealer, findUsersByDealerId, findUserByDealer, findBetsByUserId, createUser, updateUser, updateUserByAdmin, deleteUserByDealer, toggleAccountRestrictionByAdmin, toggleUserRestrictionByDealer, toggleGameStatus, declareWinnerForGame, updateWinningNumber, approvePayoutsForGame, getFinancialSummary, getNumberStakeSummary, placeBulkBets, updateGameDrawTime, resetAllGames, getAllNumberLimits, saveNumberLimit, deleteNumberLimit, findBetsByDealerId, findBetsByGameId
 };

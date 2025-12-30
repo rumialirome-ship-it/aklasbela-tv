@@ -1,6 +1,7 @@
-# A-Baba Exchange - Production Deployment Guide
 
-This comprehensive guide provides step-by-step instructions to deploy the A-Baba Exchange full-stack application on a fresh Ubuntu 22.04 server.
+# Aklasbela-TV - Production Deployment Guide
+
+This comprehensive guide provides step-by-step instructions to deploy the Aklasbela-TV full-stack application on a fresh Ubuntu 22.04 server.
 
 We will use:
 -   **Vite** to build the frontend into optimized static assets.
@@ -14,7 +15,7 @@ We will use:
 ### **Prerequisites**
 
 1.  **Ubuntu 22.04 Server**: A clean installation of Ubuntu 22.04.
-2.  **Domain Name**: A domain (`abexch.live`) with its DNS 'A' record pointing to your server's public IP address.
+2.  **Domain Name**: A domain (`aklasbela.tv`) with its DNS 'A' record pointing to your server's public IP address.
 3.  **SSH Access**: You must be able to connect to your server via SSH.
 
 ---
@@ -63,14 +64,14 @@ First, connect to your server via SSH and perform these initial configuration st
 Next, we'll create the necessary directory and upload your application code from your local machine to the server.
 
 1.  **Create Project Directory on the Server**:
-    We will host the entire application in `/var/www/html/A-babaexch`.
+    We will host the entire application in `/var/www/html/Aklasbela-TV`.
     ```bash
     # Create the main project directory
-    sudo mkdir -p /var/www/html/A-babaexch
+    sudo mkdir -p /var/www/html/Aklasbela-TV
 
     # Set the current user as the owner of this directory
     # This allows you to upload files without needing sudo.
-    sudo chown -R $USER:$USER /var/www/html/A-babaexch
+    sudo chown -R $USER:$USER /var/www/html/Aklasbela-TV
     ```
 
 2.  **Upload Files from Local Machine**:
@@ -80,9 +81,9 @@ Next, we'll create the necessary directory and upload your application code from
     # Replace /path/to/your/local/project/* with the actual path on your computer.
     # The '*' ensures the contents of the directory are copied.
     # Replace your_server_ip with your server's IP address.
-    scp -r /path/to/your/local/project/* your_username@your_server_ip:/var/www/html/A-babaexch/
+    scp -r /path/to/your/local/project/* your_username@your_server_ip:/var/www/html/Aklasbela-TV/
     ```
-    After this step, your server's `/var/www/html/A-babaexch/` directory should contain your `index.html`, `package.json`, the `backend/` folder, and all other project files.
+    After this step, your server's `/var/www/html/Aklasbela-TV/` directory should contain your `index.html`, `package.json`, the `backend/` folder, and all other project files.
 
 ---
 
@@ -92,7 +93,7 @@ Before setting up the backend, we need to install the frontend dependencies and 
 
 1.  **Navigate to the Project Directory**:
     ```bash
-    cd /var/www/html/A-babaexch
+    cd /var/www/html/Aklasbela-TV
     ```
 
 2.  **Install Frontend Dependencies**:
@@ -106,7 +107,7 @@ Before setting up the backend, we need to install the frontend dependencies and 
     ```bash
     npm run build
     ```
-    After this step, you will have a new `/var/www/html/A-babaexch/dist` folder containing the optimized frontend assets.
+    After this step, you will have a new `/var/www/html/Aklasbela-TV/dist` folder containing the optimized frontend assets.
 
 ---
 
@@ -116,7 +117,7 @@ Now, let's configure and launch the Node.js backend application.
 
 1.  **Navigate to the Backend Directory on the Server**:
     ```bash
-    cd /var/www/html/A-babaexch/backend
+    cd /var/www/html/Aklasbela-TV/backend
     ```
 
 2.  **Install Dependencies**:
@@ -150,7 +151,6 @@ Now, let's configure and launch the Node.js backend application.
     JWT_SECRET=your_super_secret_and_long_jwt_key_here
     API_KEY=your_google_gemini_api_key_here
     ```
-    > **Note**: The `API_KEY` is for the Google Gemini API. You can get a key from Google AI Studio. This is required for the "AI Lucky Pick" feature.
     
     Save and close the file (`Ctrl+X`, then `Y`, then `Enter`).
 
@@ -161,9 +161,9 @@ Now, let's configure and launch the Node.js backend application.
     ```
 
 6.  **Start the Backend with PM2**:
-    This command starts the server, names the process `ababa-backend`, and will restart it automatically if it crashes.
+    This command starts the server, names the process `aklasbela-backend`, and will restart it automatically if it crashes.
     ```bash
-    pm2 start server.js --name ababa-backend
+    pm2 start server.js --name aklasbela-backend
     ```
 
 7.  **Configure PM2 to Start on Boot**:
@@ -192,18 +192,18 @@ Nginx will act as the web server. It will serve your built frontend files and fo
 
 2.  **Create an Nginx Configuration File**:
     ```bash
-    sudo nano /etc/nginx/sites-available/abexch.live
+    sudo nano /etc/nginx/sites-available/aklasbela.tv
     ```
 
 3.  **Add the following configuration**:
-    This file tells Nginx how to handle requests for `abexch.live`.
+    This file tells Nginx how to handle requests for `aklasbela.tv`.
     ```nginx
     server {
         listen 80;
-        server_name abexch.live www.abexch.live;
+        server_name aklasbela.tv www.aklasbela.tv;
 
         # CRITICAL: Path to your project's *BUILD* folder.
-        root /var/www/html/A-babaexch/dist;
+        root /var/www/html/Aklasbela-TV/dist;
         index index.html;
 
         # For single-page applications, this ensures that refreshing any page
@@ -223,25 +223,12 @@ Nginx will act as the web server. It will serve your built frontend files and fo
         }
     }
     ```
-    > ## 🔴 CRITICAL: The `root` Path is EVERYTHING! 🔴
-    >
-    > The most common deployment failure is setting this path incorrectly. It **MUST** point to the `/dist` subfolder.
-    >
-    > **Correct Structure:**
-    > ```
-    > /var/www/html/A-babaexch/   <-- DO NOT point here
-    > └── dist/                   <-- DO point here
-    >     └── index.html          <-- The real app
-    > ```
-    >
-    > If you point it to the project root, your site will show a **"CRITICAL DEPLOYMENT MISCONFIGURATION"** error page and will not load. Double-check this line before saving.
 
     Save and close the file.
 
 4.  **Enable the Site**:
-    This creates a link from the `sites-available` directory to the `sites-enabled` directory, which Nginx reads from.
     ```bash
-    sudo ln -s /etc/nginx/sites-available/abexch.live /etc/nginx/sites-enabled/
+    sudo ln -s /etc/nginx/sites-available/aklasbela.tv /etc/nginx/sites-enabled/
     ```
 
 5.  **Test and Restart Nginx**:
@@ -249,7 +236,6 @@ Nginx will act as the web server. It will serve your built frontend files and fo
     sudo nginx -t  # Test for syntax errors
     sudo systemctl restart nginx
     ```
-    If the test is successful, your site should now be accessible at `http://abexch.live`.
 
 ---
 
@@ -258,125 +244,17 @@ Nginx will act as the web server. It will serve your built frontend files and fo
 Finally, we will secure your site with a free SSL certificate.
 
 1.  **Install Certbot**:
-    Certbot is the tool that automates obtaining and renewing SSL certificates.
     ```bash
     sudo apt install certbot python3-certbot-nginx -y
     ```
 
 2.  **Obtain and Install the SSL Certificate**:
-    This command will automatically detect your domain from the Nginx configuration, get a certificate, and update your Nginx file to use HTTPS.
     ```bash
-    sudo certbot --nginx -d abexch.live -d www.abexch.live
+    sudo certbot --nginx -d aklasbela.tv -d www.aklasbela.tv
     ```
-    Follow the on-screen prompts:
-    -   Enter your email address (for renewal notices).
-    -   Agree to the terms of service.
-    -   Choose whether to share your email.
-    -   When asked about redirecting HTTP traffic, choose option `2` to redirect. This is highly recommended for security.
-
-3.  **Verify Automatic Renewal**:
-    Certbot sets up a scheduled task to renew your certificate automatically. You can test it with a dry run.
-    ```bash
-    sudo certbot renew --dry-run
-    ```
-    If there are no errors, you're all set.
 
 ---
 
 ### **Deployment Complete!**
 
-Your A-Baba Exchange platform is now live and secure. You can access it at **`https://abexch.live`**.
-
----
-
-### **Updating the Application**
-
-When you have new code changes to deploy, follow these steps to ensure they are applied correctly.
-
-1.  **Upload New Files**:
-    Use `scp` or another method to transfer your updated files to the server, overwriting the old ones. For example, to update the backend:
-    ```bash
-    # On your local machine
-    scp -r /path/to/your/local/project/backend/* your_username@your_server_ip:/var/www/html/A-babaexch/backend/
-    ```
-
-2.  **Rebuild Frontend (if necessary)**:
-    If you made changes to the frontend code (any file outside the `backend` directory), you must create a new build.
-    ```bash
-    # On the server
-    cd /var/www/html/A-babaexch
-    npm run build
-    ```
-
-3.  **Restart the Backend Process**:
-    Simply running `pm2 restart` can sometimes fail to pick up all changes. A more reliable method is to use `reload`.
-    ```bash
-    # On the server
-    pm2 reload ababa-backend
-    ```
-    Alternatively, for a complete refresh, you can delete and restart the process:
-    ```bash
-    # On the server
-    pm2 delete ababa-backend
-    cd /var/www/html/A-babaexch/backend
-    pm2 start server.js --name ababa-backend
-    pm2 save # Don't forget to save the process list again!
-    ```
-
-4.  **Check the Logs**:
-    After restarting, immediately check the logs to confirm the new version is running and there are no errors.
-    ```bash
-    pm2 logs ababa-backend
-    ```
-
----
-
-### **Managing Your Application**
-
--   **View backend logs**: `pm2 logs ababa-backend`
--   **Restart the backend**: `pm2 restart ababa-backend`
--   **Stop the backend**: `pm2 stop ababa-backend`
--   **Check Nginx status**: `sudo systemctl status nginx`
--   **Restart Nginx**: `sudo systemctl restart nginx`
-
-### **Troubleshooting**
-
--   **Admin Login Fails AND/OR No Games Show on Landing Page**:
-    -   **Cause**: This is the most common issue after the initial deployment. It almost always means the backend database (`database.sqlite`) was not created or populated correctly. The backend server might have started before the setup script was run, creating an empty database file which the setup script then refuses to overwrite.
-    -   **Solution**: You must force a recreation of the database. Follow these steps precisely on your server:
-        1.  **Stop the backend server**:
-            ```bash
-            pm2 stop ababa-backend
-            ```
-        2.  **Navigate to the backend directory**:
-            ```bash
-            cd /var/www/html/A-babaexch/backend
-            ```
-        3.  **Delete the incorrect database file**:
-            ```bash
-            rm database.sqlite
-            ```
-        4.  **Run the setup script again to create a fresh, correct database**:
-            ```bash
-            npm run db:setup
-            ```
-            You should see messages confirming the schema was created and data was migrated.
-        5.  **Restart the backend server**:
-            ```bash
-            pm2 restart ababa-backend
-            ```
-        6.  Check the logs to confirm it started without errors: `pm2 logs ababa-backend`.
-        7.  Refresh the website. The games and login should now work.
-
--   **502 Bad Gateway Error**: This usually means Nginx can't connect to your backend.
-    -   Check if the backend is running with `pm2 status`. If it has stopped or is in an errored state, check the logs with `pm2 logs ababa-backend`.
--   **Permission Errors**: If you have issues with the database file, ensure its directory has the correct permissions: `sudo chown -R $USER:$USER /var/www/html/A-babaexch/backend`.
--   **Changes Not Appearing**: If you update frontend files, you may need to clear your browser cache. For backend changes, restart the process with `pm2 reload ababa-backend`.
--   **Blank Page or "CRITICAL DEPLOYMENT MISCONFIGURATION" Error**:
-    -   **Cause**: This is the other most common deployment error. It means your Nginx web server is serving the **development** folder (`/var/www/html/A-babaexch`) instead of the **production build** folder (`/var/www/html/A-babaexch/dist`). The browser is receiving a raw TypeScript file (`.tsx`) which it cannot execute.
-    -   **Solution**: The error page itself contains the exact steps to fix this. You must edit your Nginx configuration and change the `root` directive to point to the correct `/dist` directory.
-        1.  Open the configuration file on your server: `sudo nano /etc/nginx/sites-available/abexch.live`
-        2.  Find the line `root /var/www/html/A-babaexch;`
-        3.  Change it to **`root /var/www/html/A-babaexch/dist;`**
-        4.  Save the file, then restart Nginx: `sudo systemctl restart nginx`
-        5.  Clear your browser's cache completely and reload your website. The error will be gone.
+Your Aklasbela-TV platform is now live and secure.

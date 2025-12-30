@@ -271,6 +271,15 @@ app.put('/api/admin/games/:id/draw-time', authMiddleware, (req, res) => {
     }
 });
 
+app.put('/api/admin/games/:id/toggle-status', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    try {
+        res.json(database.toggleGameStatus(req.params.id));
+    } catch (e) {
+        res.status(e.status || 500).json({ message: e.message });
+    }
+});
+
 app.post('/api/admin/games/:id/approve-payouts', authMiddleware, (req, res) => {
     if (req.user.role !== 'ADMIN') return res.sendStatus(403);
     try { res.json(database.approvePayoutsForGame(req.params.id)); }
@@ -286,6 +295,6 @@ const startServer = () => {
   database.verifySchema();
   try { database.resetAllGames(); } catch (e) {}
   scheduleNextGameReset();
-  app.listen(3001, () => console.error('>>> A-BABA BACKEND IS LIVE ON PORT 3001 <<<'));
+  app.listen(3001, () => console.error('>>> AKLASBELA-TV BACKEND IS LIVE ON PORT 3001 <<<'));
 };
 startServer();

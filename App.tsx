@@ -14,38 +14,38 @@ const Header: React.FC = () => {
     if (!role || !account) return null;
 
     const roleColors: { [key in Role]: string } = {
-        [Role.Admin]: 'bg-red-500/20 text-red-300 border-red-500/30 shadow-[0_0_10px_rgba(239,68,68,0.5)]',
-        [Role.Dealer]: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.5)]',
-        [Role.User]: 'bg-sky-500/20 text-sky-300 border-sky-500/30 shadow-[0_0_10px_rgba(14,165,233,0.5)]',
+        [Role.Admin]: 'bg-red-900/40 text-red-300 border-red-600/40 shadow-[0_0_15px_rgba(220,38,38,0.3)]',
+        [Role.Dealer]: 'bg-rose-900/40 text-rose-100 border-rose-600/40 shadow-[0_0_15px_rgba(190,24,93,0.2)]',
+        [Role.User]: 'bg-rose-800/20 text-rose-300 border-rose-800/40',
     };
 
     return (
-        <header className="sticky top-0 z-40 bg-slate-900/50 backdrop-blur-lg border-b border-cyan-400/20">
+        <header className="sticky top-0 z-40 bg-black/40 backdrop-blur-2xl border-b border-rose-900/20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-20">
                 <div className="flex items-center gap-4">
                     {account.avatarUrl ? (
-                        <img src={account.avatarUrl} alt={account.name} className="w-12 h-12 rounded-full object-cover border-2 border-cyan-400/50" />
+                        <img src={account.avatarUrl} alt={account.name} className="w-12 h-12 rounded-full object-cover border-2 border-rose-600/50 shadow-lg shadow-black/50" />
                     ) : (
-                        <div className="w-12 h-12 rounded-full bg-slate-800 border-2 border-cyan-400/50 flex items-center justify-center">
-                            <span className="font-bold text-xl text-cyan-300">{account.name ? account.name.charAt(0) : '?'}</span>
+                        <div className="w-12 h-12 rounded-full bg-rose-950 border-2 border-rose-600/50 flex items-center justify-center">
+                            <span className="font-bold text-xl text-rose-300">{account.name ? account.name.charAt(0) : '?'}</span>
                         </div>
                     )}
                     <div>
-                        <h1 className="text-xl font-bold glitch-text hidden md:block" data-text="A-BABA EXCHANGE">A-BABA EXCHANGE</h1>
-                         <div className="flex items-center text-sm">
-                            <span className={`px-3 py-1 rounded-full text-xs font-semibold mr-2 ${roleColors[role] || 'bg-slate-700'}`}>{role}</span>
-                            <span className="text-slate-300 font-semibold tracking-wider">{account.name || 'Account'}</span>
+                        <h1 className="text-xl font-black glitch-text hidden md:block tracking-tighter" data-text="AKLASBELA-TV">AKLASBELA-TV</h1>
+                         <div className="flex items-center text-[10px] mt-1">
+                            <span className={`px-2 py-0.5 rounded-full font-black uppercase tracking-widest mr-2 border ${roleColors[role] || 'bg-slate-700'}`}>{role}</span>
+                            <span className="text-rose-100/60 font-bold tracking-[0.2em] uppercase">{account.name || 'TERMINAL'}</span>
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-6">
                      { typeof account.wallet === 'number' && (
-                        <div className="hidden md:flex items-center bg-slate-800/50 px-4 py-2 rounded-md border border-slate-700 shadow-inner">
-                            {React.cloneElement(Icons.wallet, { className: "h-6 w-6 mr-3 text-cyan-400" })}
-                            <span className="font-semibold text-white text-lg tracking-wider">PKR {account.wallet.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        <div className="hidden md:flex items-center bg-black/20 px-5 py-2.5 rounded-xl border border-rose-900/30 shadow-inner">
+                            <span className="h-6 w-6 mr-3 text-red-600">{Icons.wallet}</span>
+                            <span className="font-black text-rose-50 text-xl tracking-tight font-mono">PKR {account.wallet.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
                         </div>
                     )}
-                    <button onClick={logout} className="bg-slate-700/50 border border-slate-600 hover:bg-red-500/30 hover:border-red-500/50 text-white font-bold py-2 px-4 rounded-md transition-all duration-300">Logout</button>
+                    <button onClick={logout} className="bg-red-950/20 border border-red-900/50 hover:bg-red-600 hover:text-white text-red-500 font-black px-6 py-2.5 rounded-xl transition-all duration-500 text-xs uppercase tracking-widest">Logout</button>
                 </div>
             </div>
         </header>
@@ -94,11 +94,10 @@ const AppContent: React.FC = () => {
                 setHasInitialFetched(true);
             }
         } catch (error) {
-            console.error("Private fetch error", error);
+            console.error("Fetch error", error);
         }
     }, [role, fetchWithAuth, setAccount]);
 
-    // Handle immediate data from verify response (critical for refreshes)
     useEffect(() => {
         if (!loading && verifyData) {
             const parsed = parseAllDates(verifyData);
@@ -158,17 +157,19 @@ const AppContent: React.FC = () => {
         fetchPrivateData();
     };
 
-    if (loading) return <div className="min-h-screen flex items-center justify-center text-cyan-400 text-xl font-bold">Synchronizing Session...</div>;
+    if (loading) return <div className="min-h-screen flex items-center justify-center text-rose-500 text-2xl font-black uppercase tracking-[0.5em] animate-pulse">Syncing...</div>;
+
+    const visibleGames = role === Role.Admin ? games : games.filter(g => g.isActive);
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col selection:bg-rose-500 selection:text-white">
             {!role || !account ? (
-                <LandingPage games={games} />
+                <LandingPage games={games.filter(g => g.isActive)} />
             ) : (
                 <>
                     <Header />
-                    <main className="flex-grow">
-                        {role === Role.User && <UserPanel user={account as User} games={games} bets={bets} placeBet={placeBet} />}
+                    <main className="flex-grow pb-12">
+                        {role === Role.User && <UserPanel user={account as User} games={visibleGames} bets={bets} placeBet={placeBet} />}
                         {role === Role.Dealer && (
                             <DealerPanel 
                                 dealer={account as Dealer} users={users} 
@@ -177,14 +178,14 @@ const AppContent: React.FC = () => {
                                 topUpUserWallet={async (id, amt) => { await fetchWithAuth('/api/dealer/topup/user', { method: 'POST', body: JSON.stringify({ userId: id, amount: amt }) }); fetchPrivateData(); }} 
                                 withdrawFromUserWallet={async (id, amt) => { await fetchWithAuth('/api/dealer/withdraw/user', { method: 'POST', body: JSON.stringify({ userId: id, amount: amt }) }); fetchPrivateData(); }} 
                                 toggleAccountRestriction={async (id) => { await fetchWithAuth(`/api/dealer/users/${id}/toggle-restriction`, { method: 'PUT' }); fetchPrivateData(); }} 
-                                bets={bets} games={games} placeBetAsDealer={placeBetAsDealer} isLoaded={hasInitialFetched}
+                                bets={bets} games={visibleGames} placeBetAsDealer={placeBetAsDealer} isLoaded={hasInitialFetched}
                             />
                         )}
                         {role === Role.Admin && (
                             <AdminPanel 
                                 admin={account as Admin} dealers={dealers} 
                                 onSaveDealer={async (d, o) => { const url = o ? `/api/admin/dealers/${o}` : '/api/admin/dealers'; await fetchWithAuth(url, { method: o ? 'PUT' : 'POST', body: JSON.stringify(d) }); fetchPrivateData(); }} 
-                                users={users} setUsers={setUsers} games={games} bets={bets} 
+                                users={users} setUsers={setUsers} games={visibleGames} bets={bets} 
                                 declareWinner={async (id, num) => { await fetchWithAuth(`/api/admin/games/${id}/declare-winner`, { method: 'POST', body: JSON.stringify({ winningNumber: num }) }); fetchPrivateData(); }}
                                 updateWinner={async (id, num) => { await fetchWithAuth(`/api/admin/games/${id}/update-winner`, { method: 'PUT', body: JSON.stringify({ newWinningNumber: num }) }); fetchPrivateData(); }}
                                 approvePayouts={async (id) => { await fetchWithAuth(`/api/admin/games/${id}/approve-payouts`, { method: 'POST' }); fetchPrivateData(); }}
@@ -204,5 +205,5 @@ const AppContent: React.FC = () => {
     );
 };
 
-function App() { return (<div className="App bg-transparent text-slate-200 h-full"><AuthProvider><AppContent /></AuthProvider></div>); }
+function App() { return (<div className="App bg-transparent text-rose-50 h-full"><AuthProvider><AppContent /></AuthProvider></div>); }
 export default App;
