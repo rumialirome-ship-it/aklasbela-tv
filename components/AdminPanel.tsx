@@ -38,7 +38,6 @@ const SummaryCard: React.FC<{ title: string; value: number | string; color: stri
 
 const DashboardView: React.FC<{ summary: FinancialSummary | null; admin: Admin }> = ({ summary, admin }) => {
     const [health, setHealth] = useState<any>(null);
-    const { fetchWithAuth } = useAuth();
 
     useEffect(() => {
         fetch('/api/health').then(r => r.json()).then(setHealth).catch(() => {});
@@ -53,7 +52,6 @@ const DashboardView: React.FC<{ summary: FinancialSummary | null; admin: Admin }
                 <SummaryCard title="Gross Volume" value={summary.totals.totalStake} color="text-red-500" label="Aggregate Stakes" />
                 <SummaryCard title="Liability" value={summary.totals.totalPayouts} color="text-rose-400" label="Prize Obligations" />
                 
-                {/* System Health Card */}
                 <div className="bg-evening-red-950/40 p-8 rounded-2xl border border-rose-900/30 shadow-2xl relative flex flex-col justify-between">
                     <div>
                         <p className="text-[10px] font-black text-rose-50 uppercase tracking-[0.4em] mb-3">System Control</p>
@@ -61,7 +59,7 @@ const DashboardView: React.FC<{ summary: FinancialSummary | null; admin: Admin }
                             {health ? "STABLE" : "OFFLINE"}
                         </p>
                         <p className="text-[9px] text-rose-900 font-bold mt-2 uppercase tracking-widest">
-                            {health ? `Node ${health.node} | Uptime: ${Math.floor(health.uptime / 60)}m` : "Reconnecting..."}
+                            {health ? `Node ${health.node || 'v20'} | Uptime: ${Math.floor((health.uptime || 0) / 60)}m` : "Reconnecting..."}
                         </p>
                     </div>
                 </div>
@@ -156,7 +154,7 @@ const AdminPanel: React.FC<AdminPanelProps> = (props) => {
       } catch (error) {}
     };
     if (activeTab === 'dashboard') fetchSummary();
-  }, [activeTab, fetchWithAuth]);
+  }, [activeTab, fetchWithAuth, props.onRefreshData]);
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Icons.chartBar },

@@ -1,148 +1,67 @@
-# 🎯 AKLASBELA-TV | Production Server Deployment Guide
+# 🎯 AKLASBELA-TV | Production Server Management
 
-Welcome to the official deployment documentation for the **AKLASBELA-TV Exchange Platform**. This guide is designed for setting up a high-performance, secure environment on an **Ubuntu 22.04 LTS** VPS.
-
----
-
-## 🏗️ 1. Infrastructure Requirements
-*   **Operating System**: Ubuntu 22.04 LTS (Recommended)
-*   **Memory**: 1GB RAM (Minimum)
-*   **Software Stack**: Node.js v18+, PM2, Nginx, SQLite3
+This platform is managed via standard Git and PM2 workflows. Automated synchronization scripts have been deprecated in favor of manual, secure protocol execution.
 
 ---
 
-## 🚀 2. Server Preparation
-
-### **Update System & Install Essentials**
-```bash
-sudo apt update && sudo apt upgrade -y
-sudo apt install -y curl git build-essential nginx sqlite3
-```
-
-### **Install Node.js (v20 LTS)**
-```bash
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt install -y nodejs
-```
-
-### **Install PM2 (Global Process Manager)**
-```bash
-sudo npm install -g pm2
-```
+## 🏗️ 1. Infrastructure
+*   **Backend**: Node.js/Express (Port 3000)
+*   **Database**: SQLite3
+*   **Process Manager**: PM2
 
 ---
 
-## 📥 3. Deployment & Installation
+## 🔄 2. Standard Update Protocol
 
-### **Clone the Repository**
-```bash
-cd /var/www/html
-git clone https://github.com/YOUR_USERNAME/aklasbela-tv.git
-cd aklasbela-tv
-```
+To update the production server to the latest version from GitHub:
 
-### **Initialize Backend & Database**
-```bash
-cd backend
-npm install
-# Initialize the SQLite database from db.json if not already present
-node setup-database.js
-cd ..
-```
-
-### **Build Frontend Application**
-```bash
-npm install
-npm run build
-```
-
----
-
-## ⚙️ 4. Process Management (PM2)
-
-Start the backend service and ensure it persists after reboots:
-```bash
-cd backend
-pm2 start server.js --name "aklasbela-backend"
-pm2 save
-pm2 startup
-```
-*Note: The backend listens on port **3000** by default.*
-
----
-
-## 🌐 5. Nginx Reverse Proxy Configuration
-
-Configure Nginx to serve the frontend and proxy API requests to the Node.js backend.
-
-1. Create config: `sudo nano /etc/nginx/sites-available/aklasbela`
-2. Paste the following:
-```nginx
-server {
-    listen 80;
-    server_name yourdomain.com; # Replace with your domain
-
-    root /var/www/html/aklasbela-tv/dist;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-
-    location /api {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-```
-3. Enable site:
-```bash
-sudo ln -s /etc/nginx/sites-available/aklasbela /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-```
-
----
-
-## 🔄 6. Manual Update Process
-
-Whenever you push code to GitHub and want to update the server:
-
-1. **Pull Latest Code**:
+1. **Pull Latest Changes**:
    ```bash
-   git pull origin main
+   cd /var/www/html/aklasbela-tv
+   git fetch --all
+   git reset --hard origin/main
    ```
-2. **Update Dependencies & Rebuild**:
+
+2. **Frontend Rebuild**:
    ```bash
    npm install
    npm run build
+   ```
+
+3. **Backend Update**:
+   ```bash
    cd backend
    npm install
-   cd ..
-   ```
-3. **Restart the Backend**:
-   ```bash
    pm2 restart aklasbela-backend
    ```
 
 ---
 
-## 🛠️ 7. Maintenance Commands
+## 🛠️ 3. Maintenance Commands
 
 | Action | Command |
 | :--- | :--- |
-| **Check Backend Logs** | `pm2 logs aklasbela-backend` |
-| **Restart Backend** | `pm2 restart aklasbela-backend` |
-| **Stop Backend** | `pm2 stop aklasbela-backend` |
-| **Check Port 3000 Status** | `sudo lsof -i :3000` |
-| **Nginx Error Logs** | `sudo tail -f /var/log/nginx/error.log` |
-| **Database Check** | `sqlite3 backend/database.sqlite "PRAGMA integrity_check;"` |
+| **Check Backend Status** | `pm2 list` |
+| **View Live Logs** | `pm2 logs aklasbela-backend` |
+| **Restart Application** | `pm2 restart aklasbela-backend` |
+| **Reset Database** | `node backend/setup-database.js` *(CAUTION: Wipes all data)* |
 
 ---
+
+## 🌐 4. Nginx Integration
+
+Ensure your Nginx config proxies `/api` to `http://localhost:3000`.
+
+```nginx
+location /api {
+    proxy_pass http://localhost:3000;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+}
+```
 
 **AKLASBELA-TV EXCHANGE NETWORK**  
 *Strategic Command Terminal*

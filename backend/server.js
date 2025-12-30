@@ -4,15 +4,14 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('./authMiddleware');
 const database = require('./database');
-const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// --- AUTOMATIC GAME RESET SCHEDULER ---
+// --- AUTOMATIC GAME RESET SCHEDULER (4:00 PM PKT) ---
 const PKT_OFFSET_HOURS = 5;
-const RESET_HOUR_PKT = 16; // 4:00 PM PKT
+const RESET_HOUR_PKT = 16; 
 
 function scheduleNextGameReset() {
     const now = new Date();
@@ -23,9 +22,9 @@ function scheduleNextGameReset() {
     setTimeout(() => {
         try { 
             database.resetAllGames(); 
-            console.log('Daily game reset executed successfully.');
+            console.log('[SCHEDULER] Daily market reset executed.');
         } catch (e) { 
-            console.error('Reset error:', e); 
+            console.error('[SCHEDULER] Reset error:', e); 
         }
         scheduleNextGameReset();
     }, delay);
@@ -34,20 +33,18 @@ function scheduleNextGameReset() {
 const JWT_SECRET = process.env.JWT_SECRET || 'aklasbela_tv_secure_salt_2024';
 const PORT = process.env.PORT || 3000;
 
-// --- HEALTH CHECK ---
+// Health Check
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'UP', 
         uptime: process.uptime(), 
-        timestamp: new Date().toISOString(),
-        node: process.version
+        timestamp: new Date().toISOString()
     });
 });
 
-// Initialize Scheduler
 scheduleNextGameReset();
 
-// --- AUTHENTICATION ROUTES ---
+// --- AUTHENTICATION ---
 app.post('/api/auth/login', (req, res) => {
     const { loginId, password } = req.body;
     try {
@@ -57,10 +54,9 @@ app.post('/api/auth/login', (req, res) => {
             const token = jwt.sign({ id: account.id, role }, JWT_SECRET, { expiresIn: '1d' });
             return res.json({ token, role, account: fullAccount });
         }
-        res.status(401).json({ message: 'Invalid Account ID or Password.' });
+        res.status(401).json({ message: 'Invalid credentials.' });
     } catch (e) {
-        console.error('Login Error:', e);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
@@ -83,18 +79,16 @@ app.get('/api/auth/verify', authMiddleware, (req, res) => {
         }
         res.json({ account, role, ...extra });
     } catch (e) {
-        console.error('Verify Error:', e);
-        res.status(500).json({ message: 'Internal Server Error' });
+        res.status(500).json({ message: 'Verification error' });
     }
 });
 
-// --- PUBLIC DATA ---
+// --- GAMES & DATA ---
 app.get('/api/games', (req, res) => {
     try { res.json(database.getAllFromTable('games')); }
     catch (e) { res.status(500).json({ message: 'Failed to fetch games' }); }
 });
 
-// --- DATA ROUTES ---
 app.get('/api/user/data', authMiddleware, (req, res) => {
     if (req.user.role !== 'USER') return res.sendStatus(403);
     res.json({ account: database.findAccountById(req.user.id, 'users'), games: database.getAllFromTable('games'), bets: database.findBetsByUserId(req.user.id) });
@@ -110,7 +104,7 @@ app.get('/api/admin/data', authMiddleware, (req, res) => {
     res.json({ account: database.findAccountById(req.user.id, 'admins'), dealers: database.getAllFromTable('dealers', true), users: database.getAllFromTable('users', true), games: database.getAllFromTable('games'), bets: database.getAllFromTable('bets') });
 });
 
-// --- ACTION ROUTES ---
+// --- ACTIONS ---
 app.post('/api/user/bets', authMiddleware, (req, res) => {
     if (req.user.role !== 'USER') return res.sendStatus(403);
     try { res.status(201).json(database.placeBulkBets(req.user.id, req.body.gameId, req.body.betGroups, 'USER')); }
@@ -119,7 +113,6 @@ app.post('/api/user/bets', authMiddleware, (req, res) => {
 
 app.post('/api/dealer/bets/bulk', authMiddleware, (req, res) => {
     if (req.user.role !== 'DEALER') return res.sendStatus(403);
-    if (!database.findUserByDealer(req.body.userId, req.user.id)) return res.status(403).json({ message: "Invalid user" });
     try { res.status(201).json(database.placeBulkBets(req.body.userId, req.body.gameId, req.body.betGroups, 'DEALER')); }
     catch (e) { res.status(e.status || 400).json({ message: e.message }); }
 });
@@ -153,7 +146,7 @@ app.post('/api/admin/games/:id/approve-payouts', authMiddleware, (req, res) => {
     catch (e) { res.status(e.status || 500).json({ message: e.message }); }
 });
 
-// Database Connection and Server Start
+// Start Server
 try {
     database.connect();
     database.verifySchema();
@@ -161,28 +154,6 @@ try {
     console.error('Critical database failure:', err);
 }
 
-const server = app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`[AKLASBELA-TV] Backend operational on port ${PORT}`);
 });
-
-// Handle server errors
-server.on('error', (e) => {
-    if (e.code === 'EADDRINUSE') {
-        console.error(`FATAL ERROR: Port ${PORT} is already in use.`);
-        process.exit(1);
-    } else {
-        console.error('Server error:', e);
-    }
-});
-
-// Graceful Shutdown
-const shutdown = () => {
-    console.log('--- SYSTEM SHUTDOWN INITIATED ---');
-    server.close(() => {
-        console.log('HTTP Server closed.');
-        process.exit(0);
-    });
-};
-
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
