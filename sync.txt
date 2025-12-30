@@ -15,6 +15,10 @@ echo ">>> Starting Aklasbela-TV System Sync..."
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$DIR"
 
+# 2. Port Cleanup (Nuclear Option for EADDRINUSE)
+echo ">>> Cleaning up zombie processes on ports 3000, 3001, 3002..."
+sudo fuser -k 3000/tcp 3001/tcp 3002/tcp || true
+
 # Pull latest changes from GitHub
 echo ">>> Pulling code from GitHub..."
 git fetch --all
@@ -35,8 +39,11 @@ cd ..
 echo ">>> Fixing Database Permissions..."
 chmod 666 backend/database.sqlite 2>/dev/null || true
 
-# Restart the service via PM2
+# Restart the service via PM2 (Clean Start)
 echo ">>> Restarting PM2 Process..."
-pm2 restart aklasbela-backend || pm2 start backend/server.js --name "aklasbela-backend"
+pm2 delete aklasbela-backend 2>/dev/null || true
+cd backend
+pm2 start server.js --name "aklasbela-backend"
+cd ..
 
 echo ">>> SYNC COMPLETE: System is live!"

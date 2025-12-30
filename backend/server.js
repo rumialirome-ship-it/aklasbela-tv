@@ -33,7 +33,8 @@ function scheduleNextGameReset() {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aklasbela_tv_secure_salt_2024';
-const PORT = 3000;
+// Check environment variable PORT, default to 3000
+const PORT = process.env.PORT || 3000;
 
 // --- HEALTH CHECK ---
 app.get('/api/health', (req, res) => {
@@ -182,6 +183,16 @@ try {
 
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`[AKLASBELA-TV] Backend operational on port ${PORT}`);
+});
+
+// Handle server errors (like port collision)
+server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+        console.error(`FATAL ERROR: Port ${PORT} is already in use.`);
+        process.exit(1);
+    } else {
+        console.error('Server error:', e);
+    }
 });
 
 // Graceful Shutdown to prevent EADDRINUSE
