@@ -27,14 +27,19 @@ function scheduleNextGameReset() {
 
     const delay = resetTime.getTime() - now.getTime();
     setTimeout(() => {
-        try { database.resetAllGames(); } catch (e) { console.error('Reset error:', e); }
+        try { 
+            database.resetAllGames(); 
+            console.log('Daily game reset executed successfully.');
+        } catch (e) { 
+            console.error('Reset error:', e); 
+        }
         scheduleNextGameReset();
     }, delay);
 }
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_change_this';
 const API_KEY = process.env.API_KEY;
-const PORT = process.env.PORT || 3002; // Updated to default to 3002 as requested
+const PORT = process.env.PORT || 3002; 
 let ai = API_KEY ? new GoogleGenAI({ apiKey: API_KEY }) : null;
 
 // Initialize Scheduler
@@ -43,34 +48,44 @@ scheduleNextGameReset();
 // --- AUTHENTICATION ROUTES ---
 app.post('/api/auth/login', (req, res) => {
     const { loginId, password } = req.body;
-    const { account, role } = database.findAccountForLogin(loginId);
-    if (account && account.password === password) {
-        const fullAccount = database.findAccountById(account.id, role.toLowerCase() + 's');
-        const token = jwt.sign({ id: account.id, role }, JWT_SECRET, { expiresIn: '1d' });
-        return res.json({ token, role, account: fullAccount });
+    try {
+        const { account, role } = database.findAccountForLogin(loginId);
+        if (account && account.password === password) {
+            const fullAccount = database.findAccountById(account.id, role.toLowerCase() + 's');
+            const token = jwt.sign({ id: account.id, role }, JWT_SECRET, { expiresIn: '1d' });
+            return res.json({ token, role, account: fullAccount });
+        }
+        res.status(401).json({ message: 'Invalid Account ID or Password.' });
+    } catch (e) {
+        console.error('Login Error:', e);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
-    res.status(401).json({ message: 'Invalid Account ID or Password.' });
 });
 
 app.get('/api/auth/verify', authMiddleware, (req, res) => {
     const role = req.user.role;
     const table = role.toLowerCase() + 's';
-    const account = database.findAccountById(req.user.id, table);
-    if (!account) return res.status(404).json({ message: 'Account not found.' });
-    
-    let extra = {};
-    if (role === 'DEALER') {
-        extra.users = database.findUsersByDealerId(req.user.id);
-        extra.bets = database.findBetsByDealerId(req.user.id);
-    } else if (role === 'USER') {
-        extra.bets = database.findBetsByUserId(req.user.id);
-    } else if (role === 'ADMIN') {
-        extra.dealers = database.getAllFromTable('dealers', true);
-        extra.users = database.getAllFromTable('users', true);
-        extra.bets = database.getAllFromTable('bets');
+    try {
+        const account = database.findAccountById(req.user.id, table);
+        if (!account) return res.status(404).json({ message: 'Account not found.' });
+        
+        let extra = {};
+        if (role === 'DEALER') {
+            extra.users = database.findUsersByDealerId(req.user.id);
+            extra.bets = database.findBetsByDealerId(req.user.id);
+        } else if (role === 'USER') {
+            extra.bets = database.findBetsByUserId(req.user.id);
+        } else if (role === 'ADMIN') {
+            extra.dealers = database.getAllFromTable('dealers', true);
+            extra.users = database.getAllFromTable('users', true);
+            extra.bets = database.getAllFromTable('bets');
+        }
+        
+        res.json({ account, role, ...extra });
+    } catch (e) {
+        console.error('Verify Error:', e);
+        res.status(500).json({ message: 'Internal Server Error' });
     }
-    
-    res.json({ account, role, ...extra });
 });
 
 app.post('/api/auth/reset-password', (req, res) => {
@@ -81,7 +96,11 @@ app.post('/api/auth/reset-password', (req, res) => {
 
 // --- PUBLIC DATA ---
 app.get('/api/games', (req, res) => {
-    res.json(database.getAllFromTable('games'));
+    try {
+        res.json(database.getAllFromTable('games'));
+    } catch (e) {
+        res.status(500).json({ message: 'Failed to fetch games' });
+    }
 });
 
 // --- DATA ROUTES ---
@@ -258,9 +277,13 @@ app.put('/api/admin/accounts/:type/:id/toggle-restriction', authMiddleware, (req
 });
 
 // Database Connection and Server Start
-database.connect();
-database.verifySchema();
+try {
+    database.connect();
+    database.verifySchema();
+} catch (err) {
+    console.error('Critical database failure:', err);
+}
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
