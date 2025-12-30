@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { User, Game, SubGameType, Bet } from '../types';
 import { Icons } from '../constants';
 import { useCountdown } from '../hooks/useCountdown';
@@ -56,7 +55,54 @@ const GameCard: React.FC<{ game: Game; onPlay: (game: Game) => void; isRestricte
 
 const UserPanel: React.FC<UserPanelProps> = ({ user, games, bets, placeBet }) => {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  
+  const [betType, setBetType] = useState<SubGameType>(SubGameType.TwoDigit);
+  const [inputNumbers, setInputNumbers] = useState('');
+  const [amountPerNumber, setAmountPerNumber] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const parsedNumbers = useMemo(() => {
+    return inputNumbers.split(/[\s,.-]+/).filter(n => n.length > 0);
+  }, [inputNumbers]);
+
+  const totalStake = useMemo(() => {
+    return parsedNumbers.length * (amountPerNumber || 0);
+  }, [parsedNumbers, amountPerNumber]);
+
+  const handleCommitBet = async () => {
+    if (!selectedGame || parsedNumbers.length === 0 || amountPerNumber <= 0) {
+      setErrorMsg('Protocol violation: Incomplete data fields.');
+      return;
+    }
+    if (totalStake > user.wallet) {
+      setErrorMsg('Liquidity failure: Insufficient credits.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMsg('');
+    try {
+      await placeBet({
+        gameId: selectedGame.id,
+        betGroups: [
+          {
+            subGameType: betType,
+            numbers: parsedNumbers,
+            amountPerNumber: amountPerNumber
+          }
+        ]
+      });
+      setSelectedGame(null);
+      setInputNumbers('');
+      setAmountPerNumber(0);
+      alert("Transaction synchronized with grid.");
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Transmission interrupted.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-10 max-w-7xl mx-auto">
        {/* User Header Profile */}
@@ -87,7 +133,7 @@ const UserPanel: React.FC<UserPanelProps> = ({ user, games, bets, placeBet }) =>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {games.map(game => (
-          <GameCard key={game.id} game={game} onPlay={setSelectedGame} isRestricted={user.isRestricted} />
+          <GameCard key={game.id} game={game} onPlay={(g) => { setSelectedGame(g); setErrorMsg(''); }} isRestricted={user.isRestricted} />
         ))}
       </div>
       
@@ -123,6 +169,11 @@ const UserPanel: React.FC<UserPanelProps> = ({ user, games, bets, placeBet }) =>
                                   </tr>
                               );
                           })}
+                          {bets.filter(b => b.userId === user.id).length === 0 && (
+                            <tr>
+                                <td colSpan={4} className="p-12 text-center text-rose-950 uppercase tracking-widest font-black italic">Log Empty</td>
+                            </tr>
+                          )}
                       </tbody>
                   </table>
               </div>
@@ -133,23 +184,69 @@ const UserPanel: React.FC<UserPanelProps> = ({ user, games, bets, placeBet }) =>
         <div className="fixed inset-0 bg-black/95 backdrop-blur-2xl z-[500] flex items-center justify-center p-4">
             <div className="bg-evening-red-950 border border-rose-900/40 rounded-[2.5rem] w-full max-w-xl overflow-hidden shadow-2xl">
                 <div className="p-8 border-b border-rose-900/20 flex justify-between items-center bg-black/40">
-                    <h3 className="text-xl font-black text-rose-50 uppercase tracking-[0.3em]">Deploy Stake: {selectedGame.name}</h3>
+                    <h3 className="text-xl font-black text-rose-50 uppercase tracking-[0.3em]">Stake Terminal: {selectedGame.name}</h3>
                     <button onClick={() => setSelectedGame(null)} className="text-rose-900 hover:text-evening-red-500 transition-colors">{Icons.close}</button>
                 </div>
-                <div className="p-10 text-center">
-                    <p className="text-rose-400/60 font-bold text-[10px] uppercase tracking-widest mb-8">Manual Entry Protocol Enabled</p>
-                    {/* Simplified stake entry for UI preview */}
-                    <div className="grid grid-cols-1 gap-6 mb-10">
-                        <div className="bg-black/60 p-10 rounded-3xl border border-rose-900/30">
-                             <p className="text-rose-900 font-black uppercase text-[10px] tracking-widest mb-4">Awaiting Numerical Input</p>
-                             <div className="text-5xl font-mono font-black text-white">??</div>
-                        </div>
+                <div className="p-10">
+                    <div className="flex gap-2 mb-8 justify-center">
+                        {[SubGameType.OneDigitOpen, SubGameType.OneDigitClose, SubGameType.TwoDigit].map(type => (
+                            <button
+                                key={type}
+                                onClick={() => setBetType(type)}
+                                className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${betType === type ? 'bg-evening-red-600 text-white shadow-lg' : 'bg-black/40 text-rose-900 border border-rose-900/20'}`}
+                            >
+                                {type}
+                            </button>
+                        ))}
                     </div>
+
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-[10px] font-black text-rose-950 uppercase tracking-[0.4em] mb-2 text-center">Protocol Input (Numbers)</label>
+                            <input 
+                                type="text"
+                                value={inputNumbers}
+                                onChange={e => setInputNumbers(e.target.value)}
+                                placeholder="e.g. 14, 25, 88"
+                                className="w-full bg-black/60 border border-rose-900/30 p-6 rounded-3xl text-center text-2xl font-mono font-black text-rose-100 focus:border-evening-red-500 focus:outline-none transition-all placeholder-rose-950"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-[10px] font-black text-rose-950 uppercase tracking-[0.4em] mb-2 text-center">Unit Stake (PKR)</label>
+                            <input 
+                                type="number"
+                                value={amountPerNumber || ''}
+                                onChange={e => setAmountPerNumber(parseFloat(e.target.value) || 0)}
+                                placeholder="0.00"
+                                className="w-full bg-black/60 border border-rose-900/30 p-6 rounded-3xl text-center text-2xl font-mono font-black text-evening-red-500 focus:border-evening-red-500 focus:outline-none transition-all placeholder-rose-950"
+                            />
+                        </div>
+
+                        <div className="bg-black/40 p-6 rounded-3xl border border-rose-900/10 flex justify-between items-center">
+                            <div>
+                                <p className="text-[9px] font-black text-rose-900 uppercase tracking-widest">Aggregate Stake</p>
+                                <p className="text-2xl font-black font-mono text-rose-50">PKR {totalStake.toLocaleString()}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-[9px] font-black text-rose-900 uppercase tracking-widest">Selected Units</p>
+                                <p className="text-2xl font-black font-mono text-rose-50">{parsedNumbers.length}</p>
+                            </div>
+                        </div>
+
+                        {errorMsg && (
+                            <div className="p-4 bg-red-950/40 border border-red-900/40 rounded-xl text-[10px] font-black text-red-500 uppercase tracking-widest text-center animate-pulse">
+                                {errorMsg}
+                            </div>
+                        )}
+                    </div>
+
                     <button 
-                      onClick={() => setSelectedGame(null)}
-                      className="w-full bg-evening-red-600 hover:bg-evening-red-500 text-white font-black py-6 rounded-2xl uppercase tracking-[0.5em] text-xs transition-all shadow-xl shadow-evening-red-900/50"
+                      onClick={handleCommitBet}
+                      disabled={isSubmitting || parsedNumbers.length === 0 || amountPerNumber <= 0}
+                      className="w-full mt-10 bg-evening-red-600 hover:bg-evening-red-500 text-white font-black py-6 rounded-2xl uppercase tracking-[0.5em] text-xs transition-all shadow-xl shadow-evening-red-900/50 disabled:opacity-20"
                     >
-                        Commit Transaction
+                        {isSubmitting ? 'ENCRYPTING...' : 'COMMIT TRANSACTION'}
                     </button>
                 </div>
             </div>
