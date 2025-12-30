@@ -38,26 +38,11 @@ const SummaryCard: React.FC<{ title: string; value: number | string; color: stri
 
 const DashboardView: React.FC<{ summary: FinancialSummary | null; admin: Admin }> = ({ summary, admin }) => {
     const [health, setHealth] = useState<any>(null);
-    const [isSyncing, setIsSyncing] = useState(false);
     const { fetchWithAuth } = useAuth();
 
     useEffect(() => {
         fetch('/api/health').then(r => r.json()).then(setHealth).catch(() => {});
     }, []);
-
-    const handleCloudSync = async () => {
-        if (!window.confirm("CRITICAL ACTION: This will pull the latest code from GitHub and restart the server. The site will be offline for ~30 seconds. Proceed?")) return;
-        
-        setIsSyncing(true);
-        try {
-            await fetchWithAuth('/api/admin/system/sync', { method: 'POST' });
-            alert("Sync initiated. Please wait 30-60 seconds and refresh the page.");
-        } catch (e) {
-            alert("Sync failed to trigger. Check server logs.");
-        } finally {
-            setIsSyncing(false);
-        }
-    };
 
     if (!summary) return <div className="text-center p-20 animate-pulse text-rose-950 font-black uppercase tracking-[1em]">Scanning Mainframe...</div>;
 
@@ -68,7 +53,7 @@ const DashboardView: React.FC<{ summary: FinancialSummary | null; admin: Admin }
                 <SummaryCard title="Gross Volume" value={summary.totals.totalStake} color="text-red-500" label="Aggregate Stakes" />
                 <SummaryCard title="Liability" value={summary.totals.totalPayouts} color="text-rose-400" label="Prize Obligations" />
                 
-                {/* System Health / Sync Card */}
+                {/* System Health Card */}
                 <div className="bg-evening-red-950/40 p-8 rounded-2xl border border-rose-900/30 shadow-2xl relative flex flex-col justify-between">
                     <div>
                         <p className="text-[10px] font-black text-rose-50 uppercase tracking-[0.4em] mb-3">System Control</p>
@@ -79,13 +64,6 @@ const DashboardView: React.FC<{ summary: FinancialSummary | null; admin: Admin }
                             {health ? `Node ${health.node} | Uptime: ${Math.floor(health.uptime / 60)}m` : "Reconnecting..."}
                         </p>
                     </div>
-                    <button 
-                        onClick={handleCloudSync}
-                        disabled={isSyncing}
-                        className="mt-6 w-full bg-rose-50 hover:bg-white text-black font-black py-2 rounded-lg text-[9px] uppercase tracking-widest transition-all shadow-lg disabled:opacity-30"
-                    >
-                        {isSyncing ? "SYNCING..." : "PULL GITHUB"}
-                    </button>
                 </div>
             </div>
 

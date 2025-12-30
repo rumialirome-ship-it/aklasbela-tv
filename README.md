@@ -1,6 +1,6 @@
 # 🎯 AKLASBELA-TV | Production Server Deployment Guide
 
-Welcome to the official deployment documentation for the **AKLASBELA-TV Exchange Platform**. This guide is designed for Senior System Administrators to set up a high-performance, secure environment on an **Ubuntu 22.04 LTS** VPS.
+Welcome to the official deployment documentation for the **AKLASBELA-TV Exchange Platform**. This guide is designed for setting up a high-performance, secure environment on an **Ubuntu 22.04 LTS** VPS.
 
 ---
 
@@ -45,7 +45,7 @@ cd aklasbela-tv
 ```bash
 cd backend
 npm install
-# Initialize the SQLite database from db.json
+# Initialize the SQLite database from db.json if not already present
 node setup-database.js
 cd ..
 ```
@@ -108,28 +108,26 @@ sudo systemctl restart nginx
 
 ---
 
-## 🔄 6. Automated Updates (Sync)
+## 🔄 6. Manual Update Process
 
-We have provided a `sync.sh` script to automate your workflow. Whenever you push code to GitHub:
-```bash
-./sync.sh
-```
+Whenever you push code to GitHub and want to update the server:
 
-### **Fixing ".sh" Errors**
-If you see errors like `-bash: ./sync.sh: /bin/bash^M: bad interpreter` or `Permission Denied`:
-1.  **Fix Line Endings (Windows Copy-Paste Issue)**:
-    ```bash
-    sudo apt install -y dos2unix
-    dos2unix sync.sh
-    ```
-2.  **Fix Permissions**:
-    ```bash
-    chmod +x sync.sh
-    ```
-3.  **Run Again**:
-    ```bash
-    ./sync.sh
-    ```
+1. **Pull Latest Code**:
+   ```bash
+   git pull origin main
+   ```
+2. **Update Dependencies & Rebuild**:
+   ```bash
+   npm install
+   npm run build
+   cd backend
+   npm install
+   cd ..
+   ```
+3. **Restart the Backend**:
+   ```bash
+   pm2 restart aklasbela-backend
+   ```
 
 ---
 
@@ -139,7 +137,8 @@ If you see errors like `-bash: ./sync.sh: /bin/bash^M: bad interpreter` or `Perm
 | :--- | :--- |
 | **Check Backend Logs** | `pm2 logs aklasbela-backend` |
 | **Restart Backend** | `pm2 restart aklasbela-backend` |
-| **Check Port 3000 Status** | `sudo fuser -k 3000/tcp` |
+| **Stop Backend** | `pm2 stop aklasbela-backend` |
+| **Check Port 3000 Status** | `sudo lsof -i :3000` |
 | **Nginx Error Logs** | `sudo tail -f /var/log/nginx/error.log` |
 | **Database Check** | `sqlite3 backend/database.sqlite "PRAGMA integrity_check;"` |
 
