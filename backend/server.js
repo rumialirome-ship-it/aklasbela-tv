@@ -31,12 +31,13 @@ function scheduleNextGameReset() {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aklasbela_tv_secure_salt_2024';
-const PORT = process.env.PORT || 3000;
+const PORT = 3000; // STRICTLY 3000. DO NOT USE 3001 (OCCUPIED BY OTHER SITE)
 
 // Health Check
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'UP', 
+        port: PORT,
         uptime: process.uptime(), 
         timestamp: new Date().toISOString()
     });
@@ -155,5 +156,5 @@ try {
 }
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[AKLASBELA-TV] Backend operational on port ${PORT}`);
+    console.log(`[AKLASBELA-TV] Operational on port ${PORT}`);
 });

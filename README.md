@@ -1,56 +1,56 @@
-# 🎯 AKLASBELA-TV | Production Server Management
+# 🎯 AKLASBELA-TV | VPS Deployment Guide
 
-This platform is managed via standard Git and PM2 workflows. Automated synchronization scripts have been deprecated in favor of manual, secure protocol execution.
-
----
-
-## 🏗️ 1. Infrastructure
-*   **Backend**: Node.js/Express (Port 3000)
-*   **Database**: SQLite3
-*   **Process Manager**: PM2
+This application is managed using standard Git and PM2 workflows. Automated sync scripts have been removed for stability.
 
 ---
 
-## 🔄 2. Standard Update Protocol
-
-To update the production server to the latest version from GitHub:
-
-1. **Pull Latest Changes**:
-   ```bash
-   cd /var/www/html/aklasbela-tv
-   git fetch --all
-   git reset --hard origin/main
-   ```
-
-2. **Frontend Rebuild**:
-   ```bash
-   npm install
-   npm run build
-   ```
-
-3. **Backend Update**:
-   ```bash
-   cd backend
-   npm install
-   pm2 restart aklasbela-backend
-   ```
+## 🏗️ 1. Server Configuration
+*   **Backend Port**: 3000 (Strict)
+*   **Nginx Proxy**: Should target `http://127.0.0.1:3000`
+*   **Database**: SQLite3 (`backend/database.sqlite`)
 
 ---
 
-## 🛠️ 3. Maintenance Commands
+## 🔄 2. Normal Update Process
 
-| Action | Command |
-| :--- | :--- |
-| **Check Backend Status** | `pm2 list` |
-| **View Live Logs** | `pm2 logs aklasbela-backend` |
-| **Restart Application** | `pm2 restart aklasbela-backend` |
-| **Reset Database** | `node backend/setup-database.js` *(CAUTION: Wipes all data)* |
+To update your VPS with the latest changes:
+
+1.  **Pull latest code**:
+    ```bash
+    git fetch --all
+    git reset --hard origin/main
+    ```
+
+2.  **Rebuild Frontend**:
+    ```bash
+    npm install
+    npm run build
+    ```
+
+3.  **Restart Backend**:
+    ```bash
+    cd backend
+    npm install
+    pm2 restart aklasbela-backend
+    ```
 
 ---
 
-## 🌐 4. Nginx Integration
+## 🛠️ 3. Troubleshooting Port 3000
 
-Ensure your Nginx config proxies `/api` to `http://localhost:3000`.
+If the backend fails to start because port 3000 is "in use":
+```bash
+# Kill any existing process on port 3000
+fuser -k 3000/tcp
+
+# Restart the app
+pm2 restart aklasbela-backend
+```
+*Note: Port 3001 is reserved for your other website and is never touched by this app.*
+
+---
+
+## 🌐 4. Nginx Integration Example
 
 ```nginx
 location /api {
@@ -63,5 +63,4 @@ location /api {
 }
 ```
 
-**AKLASBELA-TV EXCHANGE NETWORK**  
-*Strategic Command Terminal*
+**AKLASBELA-TV EXCHANGE NETWORK**
