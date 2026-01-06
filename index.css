@@ -13,6 +13,7 @@ body {
   background-color: var(--bg-light);
   color: #1e293b;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 /* Bright Mesh Background */
@@ -28,16 +29,16 @@ body {
 /* Bright Glassmorphism */
 .glass {
   background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04);
 }
 
-.card-hover {
-  @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-indigo-500/10;
+.circular-card {
+  @apply aspect-square rounded-full flex flex-col items-center justify-center p-8 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/10 active:scale-95;
 }
 
-/* Custom Scrollbar (Light Theme) */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -54,11 +55,11 @@ body {
 
 /* Button & Input Overrides */
 input, select, textarea {
-  @apply bg-white border border-slate-200 rounded-3xl px-6 py-4 text-sm transition-all focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 focus:outline-none text-slate-800 placeholder:text-slate-400;
+  @apply bg-white border border-slate-200 rounded-3xl px-6 py-4 text-sm transition-all focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 focus:outline-none text-slate-800 placeholder:text-slate-400 shadow-sm;
 }
 
 .btn-primary {
-  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-black py-4 px-10 rounded-3xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden;
+  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-black py-4 px-10 rounded-full transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden;
 }
 
 .btn-primary::after {
@@ -70,4 +71,12 @@ input, select, textarea {
 
 .card {
   @apply glass rounded-[3rem] p-10;
+}
+
+.neon-glow-indigo {
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+.neon-glow-cyan {
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
 }

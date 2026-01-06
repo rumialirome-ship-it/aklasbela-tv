@@ -17,12 +17,12 @@ const ResultsTicker: React.FC<{ games: Game[] }> = ({ games }) => {
     if (results.length === 0) return null;
 
     return (
-        <div className="bg-white/40 backdrop-blur-xl border-b border-slate-200 py-4 overflow-hidden shadow-sm">
+        <div className="bg-white/60 backdrop-blur-xl border-b border-slate-100 py-5 overflow-hidden shadow-sm">
             <div className="flex whitespace-nowrap animate-marquee">
                 {[...results, ...results, ...results].map((game, i) => (
-                    <div key={i} className="flex items-center px-12 border-r border-slate-100">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mr-4">{game.name}</span>
-                        <span className="text-xl font-mono font-black text-accent-indigo tracking-tight">{game.winningNumber}</span>
+                    <div key={i} className="flex items-center px-16 border-r border-slate-50">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mr-6">{game.name}</span>
+                        <span className="text-2xl font-mono font-black text-accent-indigo tracking-tight">{game.winningNumber}</span>
                     </div>
                 ))}
             </div>
@@ -31,7 +31,7 @@ const ResultsTicker: React.FC<{ games: Game[] }> = ({ games }) => {
                     0% { transform: translateX(0); }
                     100% { transform: translateX(-50%); }
                 }
-                .animate-marquee { animation: marquee 30s linear infinite; }
+                .animate-marquee { animation: marquee 25s linear infinite; }
             `}</style>
         </div>
     );
@@ -46,32 +46,36 @@ const GameDisplayCard: React.FC<{ game: Game; onClick: () => void }> = ({ game, 
     return (
         <button
             onClick={onClick}
-            className="group relative glass p-8 flex flex-col items-center justify-between text-center transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 rounded-[3rem] border-white"
+            className="group relative circular-card glass bg-white/40 border-white hover:border-accent-indigo/30"
         >
-            <div className="w-full">
-                <div className="relative mb-6 mx-auto w-20 h-20">
-                    <div className="absolute inset-0 bg-brand-500/10 blur-3xl rounded-full animate-pulse-soft"></div>
-                    <img src={logo} alt={game.name} className="relative w-20 h-20 rounded-full border-4 border-white shadow-xl p-1 bg-white" />
-                </div>
-                <h3 className="text-xl text-slate-800 mb-1 uppercase tracking-tighter font-black">{game.name}</h3>
-                <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">{formatTime12h(game.drawTime)}</p>
-            </div>
+            <div className="absolute inset-0 bg-brand-500/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
             
-            <div className="mt-8 w-full bg-slate-50 rounded-[2rem] p-6 border border-slate-100 min-h-[100px] flex flex-col justify-center group-hover:bg-white transition-colors">
+            <div className="relative mb-4 w-24 h-24">
+                <div className="absolute inset-0 bg-accent-indigo/10 rounded-full animate-pulse-soft blur-xl"></div>
+                <img src={logo} alt={game.name} className="relative w-full h-full rounded-full border-4 border-white shadow-lg p-1 bg-white" />
+            </div>
+
+            <div className="relative z-10 text-center">
+                <h3 className="text-lg text-slate-900 mb-1 uppercase tracking-tighter font-black">{game.name}</h3>
+                
                 {hasFinalWinner ? (
-                    <>
-                        <div className="text-[9px] uppercase tracking-widest text-accent-emerald font-black mb-1">FINAL RESULT</div>
-                        <div className="text-4xl font-mono font-black text-slate-900 tracking-tighter">{game.winningNumber}</div>
-                    </>
+                    <div className="mt-2">
+                        <div className="text-[8px] uppercase tracking-widest text-accent-emerald font-black mb-1">RESULT</div>
+                        <div className="text-3xl font-mono font-black text-slate-900 leading-none">{game.winningNumber}</div>
+                    </div>
                 ) : isMarketClosed ? (
-                    <div className="text-xs font-black text-slate-400 uppercase tracking-widest">Market Closed</div>
+                    <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">Closed</div>
                 ) : (
-                    <>
-                        <div className="text-[9px] uppercase tracking-widest text-slate-400 font-bold mb-1">{status === 'OPEN' ? 'TIME REMAINING' : 'UPCOMING'}</div>
-                        <div className={`text-2xl font-mono font-black ${status === 'OPEN' ? 'text-accent-indigo' : 'text-slate-300'}`}>{countdownText}</div>
-                    </>
+                    <div className="mt-2">
+                        <div className={`text-xl font-mono font-black ${status === 'OPEN' ? 'text-accent-indigo' : 'text-slate-300'}`}>{countdownText}</div>
+                        <div className="text-[8px] uppercase tracking-widest text-slate-400 font-bold">{formatTime12h(game.drawTime)}</div>
+                    </div>
                 )}
             </div>
+            
+            {status === 'OPEN' && !isMarketClosed && !hasFinalWinner && (
+                <div className="absolute top-4 right-4 w-3 h-3 bg-accent-emerald rounded-full animate-pulse-soft neon-glow-cyan"></div>
+            )}
         </button>
     );
 };
@@ -90,74 +94,79 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
         try {
             await login(loginId, password);
         } catch (err: any) {
-            setError("ACCESS DENIED: PLEASE VERIFY CREDENTIALS");
+            setError("PROTOCOL DENIED: VERIFY CREDENTIALS");
         } finally {
             setIsSubmitting(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex flex-col overflow-x-hidden">
+        <div className="min-h-screen flex flex-col relative overflow-hidden">
             <ResultsTicker games={games} />
             
-            <div className="max-w-7xl mx-auto px-6 w-full flex-grow flex flex-col relative">
-                {/* Decorative Elements */}
-                <div className="absolute -top-24 -left-24 w-96 h-96 bg-brand-200/20 blur-[100px] rounded-full animate-mesh-flow"></div>
-                <div className="absolute top-1/2 -right-24 w-80 h-80 bg-accent-indigo/10 blur-[100px] rounded-full animate-mesh-flow"></div>
+            <div className="max-w-7xl mx-auto px-6 w-full flex-grow flex flex-col relative py-12">
+                {/* Visual Orbs */}
+                <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-indigo-500/5 blur-[120px] rounded-full animate-mesh-flow"></div>
+                <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-cyan-500/5 blur-[120px] rounded-full animate-mesh-flow" style={{ animationDelay: '-5s' }}></div>
 
-                <header className="pt-24 pb-20 text-center animate-fade-in relative z-10">
-                    <div className="inline-block px-6 py-2 rounded-full bg-white shadow-xl border border-slate-100 text-[10px] font-black text-accent-indigo uppercase tracking-[0.4em] mb-8">
-                        Secure Exchange Portal v2.9
+                <header className="pt-12 pb-16 text-center animate-fade-in relative z-10">
+                    <div className="inline-block px-8 py-2.5 rounded-full bg-white shadow-xl border border-slate-50 text-[10px] font-black text-accent-indigo uppercase tracking-[0.5em] mb-10 transition-transform hover:scale-110 cursor-default">
+                        Node Active • Exchange 3.0
                     </div>
-                    <h1 className="text-7xl md:text-9xl font-black mb-6 tracking-tighter uppercase text-slate-900 drop-shadow-sm">
-                        AKLASBELA<span className="text-accent-indigo">-</span>TV
+                    <h1 className="text-8xl md:text-[10rem] font-black mb-6 tracking-tighter uppercase text-slate-900 leading-none drop-shadow-sm">
+                        AKLASBELA<span className="text-accent-indigo">.</span>TV
                     </h1>
-                    <p className="text-slate-400 font-black tracking-[0.8em] uppercase text-xs">Professional Digital Lottery Engine</p>
+                    <p className="text-slate-400 font-black tracking-[1em] uppercase text-[11px] opacity-80">Premium Digital Lottery Engine</p>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start flex-grow mb-32 relative z-10">
-                    <div className="lg:col-span-5 flex justify-center">
-                        <div className="card w-full max-w-md bg-white/80 border-white shadow-2xl p-12 relative overflow-hidden group">
-                            <div className="absolute top-0 left-0 w-full h-2 bg-accent-indigo"></div>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-start flex-grow mb-32 relative z-10">
+                    <div className="lg:col-span-4">
+                        <div className="card w-full bg-white/90 border-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.06)] p-12 relative overflow-hidden group">
+                            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-cyan-500"></div>
                             
-                            <h2 className="text-2xl font-black text-slate-900 mb-12 uppercase tracking-tight">Terminal Sync</h2>
-                            <form onSubmit={handleLogin} className="space-y-8">
-                                <div>
-                                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Identity Code</label>
+                            <h2 className="text-2xl font-black text-slate-900 mb-12 uppercase tracking-tight flex items-center gap-4">
+                                <span className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-accent-indigo">{Icons.user}</span>
+                                Portal Entry
+                            </h2>
+                            <form onSubmit={handleLogin} className="space-y-10">
+                                <div className="space-y-3">
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block ml-2">Identity Ref</label>
                                     <input 
                                         type="text" value={loginId} onChange={e => setLoginId(e.target.value)}
-                                        className="w-full" placeholder="e.g. ADU-001"
+                                        className="w-full text-center font-bold tracking-widest uppercase" placeholder="TERMINAL_ID"
                                     />
                                 </div>
-                                <div>
-                                    <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest mb-3 block">Security Passkey</label>
+                                <div className="space-y-3">
+                                    <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em] block ml-2">Secure Passkey</label>
                                     <input 
                                         type="password" value={password} onChange={e => setPassword(e.target.value)}
-                                        className="w-full" placeholder="••••••••"
+                                        className="w-full text-center font-bold" placeholder="••••••••"
                                     />
                                 </div>
                                 {error && (
-                                    <div className="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-[10px] text-rose-500 font-black text-center uppercase tracking-wider">
+                                    <div className="p-4 bg-rose-50 border border-rose-100 rounded-3xl text-[10px] text-rose-500 font-black text-center uppercase tracking-wider animate-bounce">
                                         {error}
                                     </div>
                                 )}
-                                <button type="submit" disabled={isSubmitting} className="btn-primary w-full text-xs tracking-[0.5em] uppercase py-6 shadow-indigo-500/30">
-                                    {isSubmitting ? 'ESTABLISHING LINK...' : 'INITIATE SESSION'}
+                                <button type="submit" disabled={isSubmitting} className="btn-primary w-full text-[11px] tracking-[0.6em] uppercase py-7 shadow-indigo-500/40">
+                                    {isSubmitting ? 'ESTABLISHING...' : 'INITIATE SESSION'}
                                 </button>
                             </form>
                         </div>
                     </div>
 
-                    <div className="lg:col-span-7">
-                        <div className="flex items-center gap-6 mb-12">
-                            <h2 className="text-sm font-black text-slate-900 uppercase tracking-[0.4em]">Live Markets</h2>
-                            <div className="h-[1px] flex-grow bg-slate-200"></div>
-                            <div className="flex items-center gap-3">
-                                <span className="w-3 h-3 bg-accent-indigo rounded-full animate-pulse-soft shadow-[0_0_15px_rgba(99,102,241,0.5)]"></span>
-                                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Nodes</span>
+                    <div className="lg:col-span-8">
+                        <div className="flex items-center gap-10 mb-16">
+                            <h2 className="text-sm font-black text-slate-900 uppercase tracking-[0.6em]">Live Market Feed</h2>
+                            <div className="h-[2px] flex-grow bg-slate-100 rounded-full overflow-hidden">
+                                <div className="h-full bg-indigo-500/20 w-1/3 animate-shimmer-light"></div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <span className="w-3 h-3 bg-accent-indigo rounded-full animate-ping"></span>
+                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Nodes Synchronized</span>
                             </div>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-8">
                             {games.map(game => (
                                 <GameDisplayCard key={game.id} game={game} onClick={() => {}} />
                             ))}
@@ -165,9 +174,9 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
                     </div>
                 </div>
 
-                <footer className="py-16 text-center border-t border-slate-200">
-                   <p className="text-[11px] font-black tracking-[0.6em] uppercase text-slate-400">
-                    &copy; {new Date().getFullYear()} AKLASBELA-TV • GLOBAL ASSET PROTECTION
+                <footer className="py-20 text-center border-t border-slate-100">
+                   <p className="text-[12px] font-black tracking-[0.8em] uppercase text-slate-300">
+                    &copy; {new Date().getFullYear()} AKLASBELA-TV • INSTITUTIONAL CRYPTO PROTOCOL
                    </p>
                 </footer>
             </div>

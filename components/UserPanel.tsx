@@ -17,40 +17,38 @@ const GameCard: React.FC<{ game: Game; onPlay: (game: Game) => void; isRestricte
     const isPlayable = !!game.isMarketOpen && !isRestricted && status === 'OPEN';
 
     return (
-        <div className={`card card-hover ${!isPlayable ? 'opacity-50 grayscale pointer-events-none' : 'border-white'}`}>
-            <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-5">
-                    <img src={game.logo} alt={game.name} className="w-14 h-14 rounded-full bg-white border border-slate-100 shadow-md p-1" />
-                    <div>
-                        <h3 className="font-black text-slate-900 text-lg tracking-tighter uppercase">{game.name}</h3>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{formatTime12h(game.drawTime)}</p>
-                    </div>
-                </div>
-                <div className={`w-3 h-3 rounded-full ${isPlayable ? 'bg-accent-indigo animate-pulse' : 'bg-slate-300'}`}></div>
+        <button 
+            onClick={() => onPlay(game)}
+            disabled={!isPlayable}
+            className={`circular-card glass group ${!isPlayable ? 'opacity-40 grayscale-0 pointer-events-none brightness-75' : 'bg-white/80 border-white hover:border-accent-indigo/40'}`}
+        >
+            <div className="relative mb-4 w-24 h-24">
+                <div className={`absolute inset-0 rounded-full blur-xl transition-all ${isPlayable ? 'bg-accent-indigo/20 animate-pulse-soft' : 'bg-slate-200'}`}></div>
+                <img src={game.logo} alt={game.name} className="relative w-full h-full rounded-full border-4 border-white shadow-xl p-1 bg-white" />
             </div>
 
-            <div className="bg-slate-50 rounded-[2.5rem] p-8 text-center border border-slate-100 mb-8 shadow-inner">
+            <div className="text-center">
+                <h3 className="font-black text-slate-900 text-lg tracking-tighter uppercase">{game.name}</h3>
+                
                 {hasFinalWinner ? (
-                    <>
-                        <p className="text-[10px] text-accent-emerald font-black uppercase tracking-[0.4em] mb-2">DRAW COMPLETE</p>
-                        <div className="text-4xl font-mono font-black text-slate-900 tracking-tighter">{game.winningNumber}</div>
-                    </>
+                    <div className="mt-2">
+                        <p className="text-[8px] text-accent-emerald font-black uppercase tracking-[0.4em] mb-1">FINAL</p>
+                        <div className="text-3xl font-mono font-black text-slate-900">{game.winningNumber}</div>
+                    </div>
                 ) : (
-                    <>
-                        <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.4em] mb-2">{isPlayable ? 'TIME REMAINING' : 'MARKET LOCKED'}</p>
-                        <div className={`text-3xl font-mono font-black ${isPlayable ? 'text-accent-indigo' : 'text-slate-300'}`}>{countdownText}</div>
-                    </>
+                    <div className="mt-2">
+                        <div className={`text-2xl font-mono font-black ${isPlayable ? 'text-accent-indigo' : 'text-slate-300'}`}>{countdownText}</div>
+                        <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">{formatTime12h(game.drawTime)}</p>
+                    </div>
                 )}
             </div>
 
-            <button 
-                onClick={() => onPlay(game)} 
-                disabled={!isPlayable}
-                className="w-full btn-primary py-5 text-[11px] uppercase tracking-[0.5em] font-black"
-            >
-                START TRADE
-            </button>
-        </div>
+            {isPlayable && (
+                <div className="absolute -bottom-2 px-6 py-2 bg-accent-indigo text-white text-[9px] font-black rounded-full shadow-lg shadow-indigo-500/30 uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-opacity">
+                    STAKE NOW
+                </div>
+            )}
+        </button>
     );
 };
 
@@ -72,10 +70,10 @@ const UserPanel: React.FC<UserPanelProps> = ({ user, games, bets, placeBet }) =>
 
   const handleCommitBet = async () => {
     if (!selectedGame || parsedNumbers.length === 0 || amountPerNumber <= 0) {
-      setErrorMsg('MISSING DATA: FILL ALL PROTOCOL FIELDS'); return;
+      setErrorMsg('PROTOCOL ERROR: MISSING FIELDS'); return;
     }
     if (totalStake > user.wallet) {
-      setErrorMsg('INSUFFICIENT BALANCE FOR TRANSACTION'); return;
+      setErrorMsg('INSUFFICIENT LIQUIDITY'); return;
     }
     setIsSubmitting(true);
     setErrorMsg('');
@@ -83,66 +81,71 @@ const UserPanel: React.FC<UserPanelProps> = ({ user, games, bets, placeBet }) =>
       await placeBet({ gameId: selectedGame.id, betGroups: [{ subGameType: betType, numbers: parsedNumbers, amountPerNumber: amountPerNumber }] });
       setSelectedGame(null); setInputNumbers(''); setAmountPerNumber(0);
     } catch (err: any) {
-      setErrorMsg(err.message || 'GATEWAY ERROR');
+      setErrorMsg(err.message || 'LINK ERROR');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-16 animate-fade-in relative">
+    <div className="max-w-7xl mx-auto p-6 md:p-12 space-y-20 animate-fade-in relative pb-40">
       {/* Profile Header */}
-      <div className="card bg-white/90 border-white flex flex-col md:flex-row justify-between items-center gap-12 px-14 py-16 relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-brand-500/10 blur-[100px] rounded-full"></div>
+      <div className="card bg-white/95 border-white flex flex-col md:flex-row justify-between items-center gap-14 px-16 py-20 relative overflow-hidden shadow-[0_48px_80px_-20px_rgba(0,0,0,0.08)]">
+        <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 blur-[100px] rounded-full"></div>
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/5 blur-[100px] rounded-full"></div>
         
-        <div className="flex items-center gap-10 relative z-10">
-            <div className="w-28 h-28 rounded-[2rem] bg-slate-50 flex items-center justify-center font-black text-accent-indigo text-6xl shadow-xl border border-white">
-                {user.name.charAt(0)}
+        <div className="flex items-center gap-12 relative z-10">
+            <div className="relative">
+                <div className="absolute -inset-4 bg-accent-indigo/5 rounded-full blur-2xl animate-spin-slow"></div>
+                <div className="w-32 h-32 rounded-full bg-slate-50 flex items-center justify-center font-black text-accent-indigo text-7xl shadow-2xl border-4 border-white relative z-10 overflow-hidden">
+                   {user.avatarUrl ? <img src={user.avatarUrl} alt="" className="w-full h-full object-cover" /> : user.name.charAt(0)}
+                </div>
             </div>
             <div>
-              <h2 className="text-5xl font-black text-slate-900 tracking-tighter uppercase">{user.name}</h2>
-              <div className="flex items-center gap-3 mt-2">
-                  <span className="w-2 h-2 bg-accent-emerald rounded-full animate-pulse-soft"></span>
-                  <p className="text-slate-400 text-[12px] font-black uppercase tracking-[0.5em]">{user.id} • PORTAL ACTIVE</p>
+              <h2 className="text-6xl font-black text-slate-900 tracking-tighter uppercase leading-none mb-4">{user.name}</h2>
+              <div className="flex items-center gap-4">
+                  <span className="w-3 h-3 bg-accent-emerald rounded-full animate-pulse-soft shadow-lg shadow-emerald-500/20"></span>
+                  <p className="text-slate-400 text-[13px] font-black uppercase tracking-[0.6em]">{user.id} • NODE SYNCED</p>
               </div>
             </div>
         </div>
-        <div className="text-center md:text-right relative z-10">
-            <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.6em] mb-3">Available Liquidity</p>
-            <p className="text-6xl font-black text-slate-900 font-mono tracking-tighter">PKR {user.wallet.toLocaleString()}</p>
+        <div className="text-center md:text-right relative z-10 bg-slate-50 px-12 py-8 rounded-[3rem] border border-slate-100 shadow-inner">
+            <p className="text-[13px] font-black text-slate-400 uppercase tracking-[0.8em] mb-3">Available Credits</p>
+            <p className="text-7xl font-black text-slate-900 font-mono tracking-tighter">PKR {user.wallet.toLocaleString()}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-10">
         {games.map(game => (
           <GameCard key={game.id} game={game} onPlay={setSelectedGame} isRestricted={user.isRestricted} />
         ))}
       </div>
 
       {/* History */}
-      <div className="space-y-10 pb-32">
-          <div className="flex items-center gap-8">
-            <h3 className="text-base font-black text-slate-900 uppercase tracking-[0.4em]">Audit Archive</h3>
-            <div className="h-[1px] flex-grow bg-slate-200"></div>
+      <div className="space-y-12">
+          <div className="flex items-center gap-10">
+            <h3 className="text-base font-black text-slate-900 uppercase tracking-[0.5em]">Ledger Archive</h3>
+            <div className="h-[2px] flex-grow bg-slate-100 rounded-full"></div>
+            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Latest Transactions</div>
           </div>
-          <div className="card overflow-hidden p-0 border-white shadow-xl bg-white/50">
+          <div className="card overflow-hidden p-0 border-white shadow-2xl bg-white/60 backdrop-blur-3xl">
               <div className="overflow-x-auto">
                   <table className="w-full text-left">
-                      <thead className="bg-slate-50">
+                      <thead className="bg-slate-50/50 border-b border-slate-100">
                           <tr>
-                              <th className="p-8 text-[11px] font-black text-slate-500 uppercase tracking-widest">Time</th>
-                              <th className="p-8 text-[11px] font-black text-slate-500 uppercase tracking-widest">Market</th>
-                              <th className="p-8 text-[11px] font-black text-slate-500 uppercase tracking-widest text-right">Debit</th>
-                              <th className="p-8 text-[11px] font-black text-slate-500 uppercase tracking-widest text-right">Checksum</th>
+                              <th className="p-10 text-[12px] font-black text-slate-400 uppercase tracking-widest">Time (UTC)</th>
+                              <th className="p-10 text-[12px] font-black text-slate-400 uppercase tracking-widest">Target Market</th>
+                              <th className="p-10 text-[12px] font-black text-slate-400 uppercase tracking-widest text-right">Debit Balance</th>
+                              <th className="p-10 text-[12px] font-black text-slate-400 uppercase tracking-widest text-right">Link Status</th>
                           </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
-                          {bets.slice(-10).reverse().map(bet => (
-                              <tr key={bet.id} className="hover:bg-brand-50 transition-all">
-                                  <td className="p-8 text-[12px] font-mono text-slate-400">{new Date(bet.timestamp).toLocaleTimeString()}</td>
-                                  <td className="p-8"><span className="text-sm font-black text-slate-900 uppercase tracking-tight">{games.find(g => g.id === bet.gameId)?.name}</span></td>
-                                  <td className="p-8 text-right font-mono text-accent-rose font-black">-{bet.totalAmount.toLocaleString()}</td>
-                                  <td className="p-8 text-right font-black text-[11px] text-slate-300 uppercase tracking-[0.2em] italic">VERIFIED</td>
+                      <tbody className="divide-y divide-slate-50">
+                          {bets.slice(-12).reverse().map(bet => (
+                              <tr key={bet.id} className="hover:bg-brand-50/40 transition-all group">
+                                  <td className="p-10 text-[13px] font-mono text-slate-400">{new Date(bet.timestamp).toLocaleTimeString()}</td>
+                                  <td className="p-10"><span className="text-base font-black text-slate-900 uppercase tracking-tight group-hover:text-accent-indigo transition-colors">{games.find(g => g.id === bet.gameId)?.name}</span></td>
+                                  <td className="p-10 text-right font-mono text-accent-rose font-black text-lg">-{bet.totalAmount.toLocaleString()}</td>
+                                  <td className="p-10 text-right font-black text-[12px] text-slate-300 uppercase tracking-[0.4em] italic group-hover:text-slate-500 transition-colors">VERIFIED_TX</td>
                               </tr>
                           ))}
                       </tbody>
@@ -153,46 +156,49 @@ const UserPanel: React.FC<UserPanelProps> = ({ user, games, bets, placeBet }) =>
 
       {/* Bet Modal */}
       {selectedGame && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-8 backdrop-blur-xl animate-fade-in">
-            <div className="card w-full max-w-2xl bg-white p-0 overflow-hidden border-white shadow-2xl rounded-[4rem]">
-                <div className="p-12 bg-slate-50 flex justify-between items-center border-b border-slate-100">
-                    <div className="flex items-center gap-6">
-                        <img src={selectedGame.logo} className="w-12 h-12 rounded-2xl shadow-md bg-white p-1" alt="" />
-                        <h3 className="text-lg font-black text-slate-900 uppercase tracking-widest">TX ENTRY: {selectedGame.name}</h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-8 backdrop-blur-2xl animate-fade-in">
+            <div className="card w-full max-w-2xl bg-white p-0 overflow-hidden border-white shadow-[0_64px_128px_-32px_rgba(0,0,0,0.15)] rounded-[4.5rem]">
+                <div className="p-14 bg-slate-50 flex justify-between items-center border-b border-slate-100">
+                    <div className="flex items-center gap-8">
+                        <img src={selectedGame.logo} className="w-16 h-16 rounded-full shadow-xl bg-white p-1" alt="" />
+                        <div>
+                            <h3 className="text-xl font-black text-slate-900 uppercase tracking-widest leading-none">TX DEPLOY: {selectedGame.name}</h3>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.4em] mt-2">Target Terminal</p>
+                        </div>
                     </div>
-                    <button onClick={() => setSelectedGame(null)} className="text-slate-300 hover:text-slate-900 transition-colors p-2 bg-white rounded-full border border-slate-100">{Icons.close}</button>
+                    <button onClick={() => setSelectedGame(null)} className="p-4 bg-white rounded-full border border-slate-200 text-slate-400 hover:text-slate-900 transition-all hover:scale-110 shadow-sm">{Icons.close}</button>
                 </div>
-                <div className="p-14 space-y-12">
-                    <div className="flex justify-center gap-4">
+                <div className="p-16 space-y-14">
+                    <div className="flex justify-center gap-5">
                         {[SubGameType.OneDigitOpen, SubGameType.OneDigitClose, SubGameType.TwoDigit].map(t => (
-                            <button key={t} onClick={() => setBetType(t)} className={`px-10 py-5 rounded-[2rem] text-[11px] font-black uppercase transition-all ${betType === t ? 'bg-accent-indigo text-white shadow-xl shadow-indigo-500/30' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>{t}</button>
+                            <button key={t} onClick={() => setBetType(t)} className={`px-12 py-6 rounded-full text-[12px] font-black uppercase transition-all ${betType === t ? 'bg-accent-indigo text-white shadow-2xl shadow-indigo-500/40 scale-105' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>{t}</button>
                         ))}
                     </div>
-                    <div className="space-y-10">
-                        <div className="space-y-4 text-center">
-                             <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em]">Input Protocol Numbers</label>
-                             <input type="text" value={inputNumbers} onChange={e => setInputNumbers(e.target.value)} placeholder="01, 14, 99..." className="w-full text-center text-4xl font-mono font-black py-10 bg-slate-50 border-slate-100 rounded-[3rem]" />
+                    <div className="space-y-12">
+                        <div className="space-y-5 text-center">
+                             <label className="text-[12px] font-black text-slate-400 uppercase tracking-[0.8em]">Input Numbers</label>
+                             <input type="text" value={inputNumbers} onChange={e => setInputNumbers(e.target.value)} placeholder="e.g. 14, 52, 90" className="w-full text-center text-5xl font-mono font-black py-12 bg-slate-50 border-slate-200 rounded-[3rem] focus:ring-accent-indigo/20 shadow-inner" />
                         </div>
-                        <div className="space-y-4 text-center">
-                             <label className="text-[11px] font-black text-slate-400 uppercase tracking-[0.5em]">Credits Per Unit</label>
-                             <input type="number" value={amountPerNumber || ''} onChange={e => setAmountPerNumber(parseFloat(e.target.value) || 0)} placeholder="VALUE" className="w-full text-center text-4xl font-mono font-black py-10 text-accent-indigo bg-slate-50 border-slate-100 rounded-[3rem]" />
+                        <div className="space-y-5 text-center">
+                             <label className="text-[12px] font-black text-slate-400 uppercase tracking-[0.8em]">Credits Per Unit</label>
+                             <input type="number" value={amountPerNumber || ''} onChange={e => setAmountPerNumber(parseFloat(e.target.value) || 0)} placeholder="PKR" className="w-full text-center text-5xl font-mono font-black py-12 text-accent-indigo bg-slate-50 border-slate-200 rounded-[3rem] focus:ring-accent-indigo/20 shadow-inner" />
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-8">
-                            <div className="bg-slate-50 p-8 rounded-[3rem] text-center border border-slate-100">
-                                <p className="text-[11px] text-slate-400 font-black uppercase mb-2 tracking-[0.3em]">Total Liability</p>
-                                <p className="text-3xl font-mono font-black text-slate-900">PKR {totalStake.toLocaleString()}</p>
+                        <div className="grid grid-cols-2 gap-10">
+                            <div className="bg-slate-50 p-10 rounded-[3.5rem] text-center border border-slate-100 shadow-sm">
+                                <p className="text-[12px] text-slate-400 font-black uppercase mb-3 tracking-[0.4em]">Total Stake</p>
+                                <p className="text-4xl font-mono font-black text-slate-900">PKR {totalStake.toLocaleString()}</p>
                             </div>
-                            <div className="bg-slate-50 p-8 rounded-[3rem] text-center border border-slate-100">
-                                <p className="text-[11px] text-slate-400 font-black uppercase mb-2 tracking-[0.3em]">Unit Quantity</p>
-                                <p className="text-3xl font-mono font-black text-slate-900">{parsedNumbers.length}</p>
+                            <div className="bg-slate-50 p-10 rounded-[3.5rem] text-center border border-slate-100 shadow-sm">
+                                <p className="text-[12px] text-slate-400 font-black uppercase mb-3 tracking-[0.4em]">Unit Count</p>
+                                <p className="text-4xl font-mono font-black text-slate-900">{parsedNumbers.length}</p>
                             </div>
                         </div>
                     </div>
                     
-                    {errorMsg && <p className="text-center text-rose-500 font-black text-[11px] uppercase tracking-widest animate-bounce">{errorMsg}</p>}
+                    {errorMsg && <div className="text-center text-rose-500 font-black text-[12px] uppercase tracking-widest bg-rose-50 py-4 rounded-3xl border border-rose-100 animate-bounce">{errorMsg}</div>}
                     
-                    <button onClick={handleCommitBet} disabled={isSubmitting || !totalStake} className="btn-primary w-full py-7 text-[13px] tracking-[0.6em] rounded-[3rem] shadow-indigo-500/40">
+                    <button onClick={handleCommitBet} disabled={isSubmitting || !totalStake} className="btn-primary w-full py-8 text-[15px] tracking-[0.8em] rounded-full shadow-indigo-500/50">
                         {isSubmitting ? 'SYNCING TRANSACTION...' : 'COMMIT TO LEDGER'}
                     </button>
                 </div>
