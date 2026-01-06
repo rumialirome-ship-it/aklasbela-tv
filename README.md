@@ -1,59 +1,66 @@
-# 🎯 AKLASBELA-TV | Standard VPS Management Guide
+# 🎯 AKLASBELA-TV | VPS Deployment Guide
 
-This guide provides the industry-standard "Manual Solution" for running the AKLASBELA-TV exchange on a VPS using PM2.
-
----
-
-## 🏗️ 1. Environment Details
-*   **Backend Port**: 3000 (Strictly enforced)
-*   **Database**: SQLite3 (`backend/database.sqlite`)
-*   **Manager**: PM2 with `ecosystem.config.js`
+This app is designed for simple, manual deployment. All automated sync scripts have been removed for maximum stability.
 
 ---
 
-## 🚀 2. Deployment (The New Solution)
-
-Instead of using sync scripts, follow these standard steps:
-
-1.  **Pull Latest Updates**:
-    ```bash
-    git pull origin main
-    ```
-
-2.  **Build Frontend**:
-    ```bash
-    npm install
-    npm run build
-    ```
-
-3.  **Start/Reload Backend**:
-    ```bash
-    cd backend
-    npm install
-    # Start for the first time
-    pm2 start ecosystem.config.js
-    # OR Reload after changes
-    pm2 reload aklasbela-backend
-    ```
+## 🏗️ 1. Environment Requirements
+*   **Port**: 3000 (Strictly enforced for backend and frontend).
+*   **Node.js**: v18 or v20+ recommended.
+*   **Database**: SQLite3 (automatically handled).
 
 ---
 
-## 🛠️ 3. Handling Conflicts (Port 3000 Only)
+## 🚀 2. Step-by-Step Manual Deployment
 
-If PM2 fails because Port 3000 is "busy", run this command to clear **only** this app's space:
+Follow these 3 steps to get the app running:
+
+### Step 1: Prepare the Code
 ```bash
-fuser -k 3000/tcp
-pm2 reload aklasbela-backend
+# Pull latest code
+git pull origin main
+
+# Install root dependencies and build the interface
+npm install
+npm run build
 ```
-*Note: This command will not affect your website running on Port 3001.*
+
+### Step 2: Prepare the Backend
+```bash
+cd backend
+# Install backend dependencies
+npm install
+
+# Initialize the database (ONLY RUN ONCE OR WHEN DATA IS RESET)
+# WARNING: This will overwrite existing data if database.sqlite exists.
+node setup-database.js
+```
+
+### Step 3: Start with PM2
+```bash
+# Start the process using the config file
+pm2 start ecosystem.config.js
+
+# To see logs if there is an error:
+pm2 logs aklasbela-backend
+```
 
 ---
 
-## 🌐 4. Nginx Reverse Proxy Config
+## 🛠️ 3. Fix "500 Internal Server Error"
 
-Point your domain to the internal Port 3000:
+If you get a 500 error at the root URL, it usually means the `dist` folder is missing or PM2 is stuck.
+1. Run `npm run build` in the project root.
+2. Run `fuser -k 3000/tcp` to clear the port.
+3. Run `pm2 reload aklasbela-backend`.
+
+---
+
+## 🌐 4. Nginx Reverse Proxy (Optional)
+
+Nginx should simply point everything to Port 3000:
 ```nginx
-location /api {
+location / {
     proxy_pass http://localhost:3000;
     proxy_http_version 1.1;
     proxy_set_header Upgrade $http_upgrade;

@@ -1,2 +1,3 @@
-DEPRECATED: Please delete this file and sync.sh.
-Use standard 'git pull' and 'pm2 restart' for a normal VPS process.
+THIS FILE IS DEPRECATED.
+Refer to README.md for the new, simplified manual deployment process.
+The sync scripts have been removed to ensure port stability.
