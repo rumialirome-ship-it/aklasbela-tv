@@ -36,11 +36,12 @@ export default {
         }
       },
       animation: {
-        'mesh-flow': 'mesh-flow 15s ease-in-out infinite',
-        'shimmer-light': 'shimmer-light 2.5s linear infinite',
-        'pulse-soft': 'pulse-soft 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'spin-slow': 'spin 12s linear infinite',
-        'float': 'float 5s ease-in-out infinite',
+        'mesh-flow': 'mesh-flow 20s ease-in-out infinite',
+        'shimmer-light': 'shimmer-light 3s linear infinite',
+        'pulse-soft': 'pulse-soft 3s ease-in-out infinite',
+        'spin-slow': 'spin 15s linear infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'fade-in': 'fade-in 0.5s ease-out forwards',
       },
       keyframes: {
         'mesh-flow': {
@@ -53,11 +54,15 @@ export default {
         },
         'pulse-soft': {
           '0%, 100%': { opacity: '1', transform: 'scale(1)' },
-          '50%': { opacity: '0.8', transform: 'scale(1.03)' },
+          '50%': { opacity: '0.85', transform: 'scale(1.02)' },
         },
         'float': {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-12px)' },
+          '50%': { transform: 'translateY(-15px)' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
         }
       }
     },

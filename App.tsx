@@ -14,23 +14,23 @@ const Header: React.FC = () => {
     if (!role || !account) return null;
 
     return (
-        <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-3xl border-b border-slate-200/50 shadow-sm">
-            <div className="max-w-7xl mx-auto px-10 flex justify-between items-center h-32">
-                <div className="flex items-center gap-10 group">
-                    <div className="w-20 h-20 rounded-full bg-accent-indigo flex items-center justify-center font-black text-white text-4xl shadow-2xl shadow-indigo-500/40 border-4 border-white transition-all group-hover:scale-110 group-hover:rotate-12 cursor-pointer">AB</div>
+        <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-3xl border-b border-slate-200/50 shadow-sm transition-all duration-300">
+            <div className="max-w-7xl mx-auto px-6 sm:px-10 flex justify-between items-center h-24 sm:h-32">
+                <div className="flex items-center gap-4 sm:gap-10 group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+                    <div className="w-12 h-12 sm:w-20 sm:h-20 rounded-full bg-accent-indigo flex items-center justify-center font-bold text-white text-xl sm:text-4xl shadow-2xl shadow-indigo-500/40 border-4 border-white transition-all group-hover:scale-105 group-hover:rotate-12">AB</div>
                     <div>
-                        <h1 className="text-3xl font-black tracking-tighter text-slate-900 hidden md:block uppercase leading-none">AKLASBELA<span className="text-accent-indigo">.</span>TV</h1>
-                        <p className="text-[12px] font-black text-slate-400 tracking-[0.8em] uppercase mt-3 opacity-60">{role} ENVIRONMENT</p>
+                        <h1 className="text-xl sm:text-3xl font-bold tracking-tighter text-slate-900 hidden xs:block uppercase leading-none">AKLASBELA<span className="text-accent-indigo">.</span>TV</h1>
+                        <p className="text-[10px] sm:text-[12px] font-bold text-slate-400 tracking-[0.5em] sm:tracking-[0.8em] uppercase mt-1 sm:mt-3 opacity-60">Digital Hub</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-14">
-                    <div className="hidden sm:flex items-center bg-slate-100/50 px-12 py-5 rounded-full border border-slate-200/50 shadow-inner">
-                        <span className="text-[14px] font-black text-slate-400 font-mono tracking-[0.4em] uppercase mr-8 opacity-70">Credits</span>
-                        <span className="text-2xl font-black text-slate-900 font-mono tracking-tighter">PKR {account.wallet.toLocaleString()}</span>
+                <div className="flex items-center gap-4 sm:gap-12">
+                    <div className="hidden md:flex items-center bg-slate-50/50 px-10 py-5 rounded-full border border-slate-100 shadow-inner">
+                        <span className="text-[13px] font-bold text-slate-400 font-mono tracking-[0.4em] uppercase mr-8 opacity-70">Vault</span>
+                        <span className="text-xl font-bold text-slate-900 font-mono tracking-tighter">PKR {account.wallet.toLocaleString()}</span>
                     </div>
-                    <button onClick={logout} className="text-[13px] font-black text-slate-400 hover:text-rose-500 uppercase tracking-[0.6em] transition-all flex items-center gap-5 group">
-                        <span className="hidden group-hover:block transition-all opacity-0 group-hover:opacity-100">TERMINATE</span>
-                        <div className="p-4 bg-white rounded-full border border-slate-200 group-hover:bg-rose-50 group-hover:border-rose-100 shadow-sm group-hover:scale-110">
+                    <button onClick={logout} className="text-[10px] sm:text-[13px] font-bold text-slate-400 hover:text-rose-500 uppercase tracking-[0.4em] transition-all flex items-center gap-3 sm:gap-5 group">
+                        <span className="hidden sm:group-hover:block transition-all opacity-0 group-hover:opacity-100">LOGOUT</span>
+                        <div className="p-3 sm:p-4 bg-white rounded-full border border-slate-200 group-hover:bg-rose-50 group-hover:border-rose-100 shadow-sm transition-transform group-hover:scale-110">
                             {Icons.close}
                         </div>
                     </button>
@@ -50,7 +50,7 @@ const AppContent: React.FC = () => {
     const lastGamesRef = useRef<Game[]>([]);
 
     useEffect(() => {
-        document.title = role ? `${role} Terminal | AKLASBELA.TV` : `AKLASBELA.TV | Digital Lottery`;
+        document.title = role ? `${role} Portal | AKLASBELA.TV` : `AKLASBELA.TV | Exchange`;
     }, [role]);
 
     const fetchPublicData = useCallback(async () => {
@@ -106,28 +106,28 @@ const AppContent: React.FC = () => {
 
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 overflow-hidden relative">
-            <div className="absolute top-0 left-0 w-full h-2 bg-slate-100">
+            <div className="absolute top-0 left-0 w-full h-1 bg-slate-100">
                 <div className="h-full bg-accent-indigo w-1/4 animate-shimmer-light"></div>
             </div>
-            <div className="w-32 h-32 border-[12px] border-slate-100 border-t-accent-indigo rounded-full animate-spin mb-12 shadow-2xl shadow-indigo-500/20"></div>
-            <div className="text-slate-900 font-black text-4xl tracking-[1.2em] uppercase animate-pulse">DECRYPTING...</div>
+            <div className="w-20 h-20 sm:w-28 sm:h-28 border-[10px] border-slate-100 border-t-accent-indigo rounded-full animate-spin mb-10 shadow-xl shadow-indigo-500/10"></div>
+            <div className="text-slate-900 font-bold text-2xl sm:text-3xl tracking-[1em] uppercase animate-pulse">Syncing...</div>
         </div>
     );
 
     return (
-        <div className="min-h-screen selection:bg-accent-indigo selection:text-white transition-colors duration-1000">
+        <div className="min-h-screen transition-colors duration-700">
             <div className="animated-bg"></div>
             {!role || !account ? (
                 <LandingPage games={games.filter(g => g.isActive)} />
             ) : (
-                <>
+                <div className="flex flex-col min-h-screen">
                     <Header />
-                    <main className="relative z-10">
+                    <main className="flex-grow relative z-10 overflow-x-hidden">
                         {role === Role.User && <UserPanel user={account as User} games={games.filter(g => g.isActive)} bets={bets} placeBet={async d => { await fetchWithAuth('/api/user/bets', { method: 'POST', body: JSON.stringify(d) }); fetchPrivateData(); }} />}
                         {role === Role.Dealer && <DealerPanel dealer={account as Dealer} users={users} onSaveUser={async (u,o,i) => {}} onDeleteUser={async u => {}} topUpUserWallet={async (id,a) => {}} withdrawFromUserWallet={async (id,a) => {}} toggleAccountRestriction={u => {}} bets={bets} games={games} placeBetAsDealer={async d => {}} />}
                         {role === Role.Admin && <AdminPanel admin={account as Admin} dealers={dealers} onSaveDealer={async d => {}} users={users} setUsers={setUsers} games={games} bets={bets} declareWinner={async (i,n) => {}} updateWinner={async (i,n) => {}} approvePayouts={async i => {}} topUpDealerWallet={async (i,a) => {}} withdrawFromDealerWallet={async (i,a) => {}} toggleAccountRestriction={async (i,t) => {}} onPlaceAdminBets={async d => {}} updateGameDrawTime={async (i,t) => {}} onRefreshData={fetchPrivateData} />}
                     </main>
-                </>
+                </div>
             )}
             {activeReveal && <ResultRevealOverlay gameName={activeReveal.name} winningNumber={activeReveal.number} onClose={() => setActiveReveal(null)} />}
         </div>

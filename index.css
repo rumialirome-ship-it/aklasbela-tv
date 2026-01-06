@@ -14,9 +14,10 @@ body {
   color: #0f172a;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  @apply selection:bg-accent-indigo selection:text-white;
 }
 
-/* Grayish Bright Mesh Background */
+/* Grayish Mesh Background with smoother flow */
 .animated-bg {
   position: fixed;
   inset: 0;
@@ -28,24 +29,24 @@ body {
 
 /* Advanced Glassmorphism */
 .glass {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(32px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px -8px rgba(0, 0, 0, 0.04);
 }
 
-/* Unique Circular Cards */
+/* Circular Game Cards - Responsive Sizing */
 .circular-game-card {
-  @apply aspect-square rounded-full flex flex-col items-center justify-center p-6 transition-all duration-700 hover:shadow-[0_30px_70px_-15px_rgba(99,102,241,0.25)] hover:-translate-y-3 active:scale-95 relative overflow-hidden;
+  @apply aspect-square rounded-full flex flex-col items-center justify-center p-4 sm:p-6 transition-all duration-500 hover:shadow-[0_24px_48px_-12px_rgba(99,102,241,0.2)] hover:-translate-y-2 active:scale-95 relative overflow-hidden;
 }
 
-/* Buttons & Inputs */
+/* Inputs & Buttons with better mobile feel */
 input, select, textarea {
-  @apply bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm transition-all focus:border-accent-indigo focus:ring-4 focus:ring-accent-indigo/10 focus:outline-none text-slate-800 placeholder:text-slate-400 shadow-sm font-semibold;
+  @apply bg-white/80 border border-slate-200 rounded-2xl px-5 py-4 text-sm transition-all focus:border-accent-indigo focus:ring-4 focus:ring-accent-indigo/10 focus:outline-none text-slate-800 placeholder:text-slate-400 shadow-sm font-semibold w-full;
 }
 
 .btn-primary {
-  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-bold py-5 px-12 rounded-full transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden uppercase tracking-widest text-sm;
+  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-bold py-4 px-8 sm:py-5 sm:px-12 rounded-full transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden uppercase tracking-widest text-xs sm:text-sm;
 }
 
 .btn-primary::after {
@@ -56,14 +57,28 @@ input, select, textarea {
 }
 
 .card {
-  @apply glass rounded-[3rem] p-10;
+  @apply glass rounded-[2.5rem] sm:rounded-[3.5rem] p-6 sm:p-10;
 }
 
 .text-gradient {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-accent-indigo to-accent-cyan;
 }
 
-/* Fix for animation issue */
-.spin-on-hover:hover {
-  animation: spin 12s linear infinite;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
