@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aklasbela_tv_secure_salt_2024';
-const PORT = process.env.PORT || 3005; // Changed default to 3005
+const PORT = process.env.PORT || 3005;
 
 // --- AUTOMATIC GAME RESET SCHEDULER (4:00 PM PKT) ---
 const PKT_OFFSET_HOURS = 5;
@@ -43,7 +43,8 @@ app.get('/api/health', (req, res) => {
         status: 'UP', 
         port: PORT,
         processId: process.pid,
-        timestamp: new Date().toISOString() 
+        timestamp: new Date().toISOString(),
+        node: process.version
     });
 });
 
@@ -139,13 +140,21 @@ try {
 }
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[AKLASBELA-EXCHANGE] PID:${process.pid} LIVE ON PORT ${PORT}`);
+    console.log('--------------------------------------------------');
+    console.log(`🚀 AKLASBELA-TV EXCHANGE IS LIVE`);
+    console.log(`📡 PORT: ${PORT}`);
+    console.log(`🆔 PID:  ${process.pid}`);
+    console.log(`🌐 URL:  http://localhost:${PORT}`);
+    console.log('--------------------------------------------------');
 });
 
 server.on('error', (e) => {
     if (e.code === 'EADDRINUSE') {
-        console.error(`[FATAL] Port ${PORT} is already taken by another process!`);
-        console.error(`[HELP] Try running: fuser -k ${PORT}/tcp`);
+        console.error('--------------------------------------------------');
+        console.error(`❌ FATAL: Port ${PORT} is already in use!`);
+        console.error(`💡 FIX: Run "lsof -i :${PORT}" to find the process.`);
+        console.error(`💡 THEN: Run "kill -9 <PID>" or "fuser -k ${PORT}/tcp"`);
+        console.error('--------------------------------------------------');
         process.exit(1);
     }
 });

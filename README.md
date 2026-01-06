@@ -4,9 +4,15 @@ This application consists of two parts: the **Frontend** (Root) and the **Backen
 
 ---
 
-## 🚀 1. Unique Port Deployment (Multiple Apps)
+## 📊 1. VPS Port Inventory (DO NOT CONFLICT)
+Keep this list updated to avoid overlapping ports on your server:
+- **Port 3001**: Site B (Important)
+- **Port 5000**: Site C (Important)
+- **Port 3005**: **AKLASBELA-TV (This App)** ⬅️
 
-Since you have other PM2 apps running, this app is configured to use **Port 3005**.
+---
+
+## 🚀 2. Deployment Steps
 
 ### Step 1: Clean start
 ```bash
@@ -24,53 +30,42 @@ npm run build
 ```bash
 cd backend
 pm2 start ecosystem.config.js
+pm2 save
 ```
 
 ---
 
-## 🌐 2. Update Nginx (CRITICAL)
+## 🌐 3. Update Nginx (CRITICAL)
 
-If you are using Nginx to serve your domain (e.g., aklasbela-tv.com), you **must** update the Nginx configuration file.
+Ensure the file `/etc/nginx/sites-available/aklasbela-tv.com` contains:
+```nginx
+location / {
+    proxy_pass http://localhost:3005; # Points to the Node app
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection 'upgrade';
+    proxy_set_header Host $host;
+    proxy_cache_bypass $http_upgrade;
+}
+```
 
-1. Open your Nginx config:
-   `sudo nano /etc/nginx/sites-available/default` (or your specific config file)
-
-2. Find the `location /` or `location /api` block and change the port:
-   ```nginx
-   location / {
-       proxy_pass http://localhost:3005; # WAS 3000, MUST BE 3005
-       proxy_http_version 1.1;
-       proxy_set_header Upgrade $http_upgrade;
-       proxy_set_header Connection 'upgrade';
-       proxy_set_header Host $host;
-       proxy_cache_bypass $http_upgrade;
-   }
-   ```
-
-3. Test and restart Nginx:
-   ```bash
-   sudo nginx -t
-   sudo systemctl restart nginx
-   ```
+Then run:
+`sudo nginx -t`
+`sudo systemctl restart nginx`
 
 ---
 
-## 🔍 3. Troubleshooting Multi-App VPS
+## 🔍 4. Verification
 
-### Check what ports are used:
-```bash
-netstat -tuln | grep LISTEN
-```
+1. **Check Backend Health**: 
+   Open `https://aklasbela-tv.com/api/health` in your browser.
+   It should return: `{"status":"UP","port":3005...}`
 
-### Find the PID of an app on a port:
-```bash
-lsof -i :3005
-```
+2. **Check Logs**:
+   `pm2 logs aklasbela-exchange`
 
-### View all PM2 apps:
-```bash
-pm2 list
-```
+3. **Check Ports**:
+   `netstat -tuln | grep LISTEN` (Make sure 3001, 3005, and 5000 are all present).
 
 ---
 
