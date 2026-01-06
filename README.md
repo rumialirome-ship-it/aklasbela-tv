@@ -11,7 +11,6 @@ Since you have other PM2 apps running, this app is configured to use **Port 3005
 ### Step 1: Clean start
 ```bash
 # Delete the old process if it exists
-pm2 delete aklasbela-backend
 pm2 delete aklasbela-exchange
 ```
 
@@ -29,19 +28,42 @@ pm2 start ecosystem.config.js
 
 ---
 
-## 🔍 2. Troubleshooting Multi-App VPS
+## 🌐 2. Update Nginx (CRITICAL)
 
-If you still get a 500 error, another app might be using Port 3005.
+If you are using Nginx to serve your domain (e.g., aklasbela-tv.com), you **must** update the Nginx configuration file.
+
+1. Open your Nginx config:
+   `sudo nano /etc/nginx/sites-available/default` (or your specific config file)
+
+2. Find the `location /` or `location /api` block and change the port:
+   ```nginx
+   location / {
+       proxy_pass http://localhost:3005; # WAS 3000, MUST BE 3005
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection 'upgrade';
+       proxy_set_header Host $host;
+       proxy_cache_bypass $http_upgrade;
+   }
+   ```
+
+3. Test and restart Nginx:
+   ```bash
+   sudo nginx -t
+   sudo systemctl restart nginx
+   ```
+
+---
+
+## 🔍 3. Troubleshooting Multi-App VPS
 
 ### Check what ports are used:
 ```bash
-# List all processes using ports
 netstat -tuln | grep LISTEN
 ```
 
 ### Find the PID of an app on a port:
 ```bash
-# Replace 3005 with the port you want to check
 lsof -i :3005
 ```
 
