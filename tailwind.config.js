@@ -10,8 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        'sans': ['"Plus Jakarta Sans"', 'sans-serif'],
-        'display': ['Syne', 'sans-serif'],
+        'sans': ['"Space Grotesk"', 'sans-serif'],
+        'display': ['"Space Grotesk"', 'sans-serif'],
       },
       colors: {
         'brand': {
@@ -36,10 +36,10 @@ export default {
         }
       },
       animation: {
-        'mesh-flow': 'mesh-flow 18s ease-in-out infinite',
+        'mesh-flow': 'mesh-flow 15s ease-in-out infinite',
         'shimmer-light': 'shimmer-light 2.5s linear infinite',
         'pulse-soft': 'pulse-soft 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'rotate-slow': 'spin 12s linear infinite',
+        'spin-slow': 'spin 12s linear infinite',
         'float': 'float 5s ease-in-out infinite',
       },
       keyframes: {

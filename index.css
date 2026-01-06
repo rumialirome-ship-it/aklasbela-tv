@@ -5,23 +5,18 @@
 
 :root {
   --brand-primary: #6366f1;
-  --bg-light: #f1f5f9; /* Soft Grayish Base */
+  --bg-light: #f1f5f9;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: 'Space Grotesk', sans-serif;
   background-color: var(--bg-light);
-  color: #334155;
+  color: #0f172a;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, .font-display {
-  font-family: 'Syne', sans-serif;
-  letter-spacing: -0.02em;
-}
-
-/* Bright Grayish Mesh Background */
+/* Grayish Bright Mesh Background */
 .animated-bg {
   position: fixed;
   inset: 0;
@@ -33,32 +28,24 @@ h1, h2, h3, h4, .font-display {
 
 /* Advanced Glassmorphism */
 .glass {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(32px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
 }
 
 /* Unique Circular Cards */
 .circular-game-card {
-  @apply aspect-square rounded-full flex flex-col items-center justify-center p-6 transition-all duration-700 hover:shadow-[0_20px_60px_-15px_rgba(99,102,241,0.2)] hover:-translate-y-2 active:scale-95 relative overflow-hidden;
-}
-
-.circular-game-card::before {
-  content: '';
-  @apply absolute inset-0 border-2 border-dashed border-slate-200 rounded-full opacity-50 group-hover:animate-spin-slow;
+  @apply aspect-square rounded-full flex flex-col items-center justify-center p-6 transition-all duration-700 hover:shadow-[0_30px_70px_-15px_rgba(99,102,241,0.25)] hover:-translate-y-3 active:scale-95 relative overflow-hidden;
 }
 
 /* Buttons & Inputs */
 input, select, textarea {
-  @apply bg-white border border-slate-200 rounded-3xl px-6 py-4 text-sm transition-all focus:border-accent-indigo focus:ring-4 focus:ring-accent-indigo/10 focus:outline-none text-slate-800 placeholder:text-slate-400 shadow-sm font-medium;
+  @apply bg-white border border-slate-200 rounded-2xl px-6 py-4 text-sm transition-all focus:border-accent-indigo focus:ring-4 focus:ring-accent-indigo/10 focus:outline-none text-slate-800 placeholder:text-slate-400 shadow-sm font-semibold;
 }
 
 .btn-primary {
-  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-extrabold py-5 px-12 rounded-full transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden;
-  font-family: 'Syne', sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-bold py-5 px-12 rounded-full transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden uppercase tracking-widest text-sm;
 }
 
 .btn-primary::after {
@@ -69,24 +56,14 @@ input, select, textarea {
 }
 
 .card {
-  @apply glass rounded-[3.5rem] p-10;
-}
-
-/* Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  @apply glass rounded-[3rem] p-10;
 }
 
 .text-gradient {
   @apply bg-clip-text text-transparent bg-gradient-to-r from-accent-indigo to-accent-cyan;
+}
+
+/* Fix for animation issue */
+.spin-on-hover:hover {
+  animation: spin 12s linear infinite;
 }
