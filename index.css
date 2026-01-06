@@ -4,94 +4,70 @@
 @tailwind utilities;
 
 :root {
-  --neon-blue: #3b82f6;
-  --neon-cyan: #06b6d4;
-  --bg-dark: #020204;
+  --brand-primary: #6366f1;
+  --bg-light: #f8fafc;
 }
 
 body {
   font-family: 'Russo One', sans-serif;
-  background-color: var(--bg-dark);
-  color: #f8fafc;
+  background-color: var(--bg-light);
+  color: #1e293b;
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
 }
 
-/* Cyber Grid Background */
+/* Bright Mesh Background */
 .animated-bg {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: radial-gradient(circle at 50% 50%, #070710 0%, #020204 100%);
+  background: linear-gradient(-45deg, #f8fafc, #e0f2fe, #f5f3ff, #f0f9ff);
+  background-size: 400% 400%;
+  animation: mesh-flow 15s ease infinite;
 }
 
-.animated-bg::after {
-  content: '';
-  position: absolute;
-  inset: -100%;
-  background-image: 
-    linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
-  background-size: 40px 40px;
-  transform: perspective(500px) rotateX(60deg);
-  animation: grid-scroll 20s linear infinite;
-  mask-image: radial-gradient(ellipse at center, black, transparent 80%);
-}
-
-/* Glass & Neon */
+/* Bright Glassmorphism */
 .glass {
-  background: rgba(7, 7, 16, 0.7);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(59, 130, 246, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
 }
 
-.neon-border {
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+.card-hover {
+  @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-indigo-500/10;
 }
 
-.neon-text-cyan {
-  color: #06b6d4;
-  text-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
-}
-
-.neon-text-blue {
-  color: #3b82f6;
-  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
-}
-
-/* Custom Scrollbar */
+/* Custom Scrollbar (Light Theme) */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #020204;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #cbd5e1;
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3b82f6;
+  background: #94a3b8;
 }
 
-/* Button & Input Styles */
+/* Button & Input Overrides */
 input, select, textarea {
-  @apply bg-slate-900/50 border border-brand-500/20 rounded-2xl px-5 py-4 text-sm transition-all focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan/20 focus:outline-none placeholder:text-slate-600;
+  @apply bg-white border border-slate-200 rounded-3xl px-6 py-4 text-sm transition-all focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 focus:outline-none text-slate-800 placeholder:text-slate-400;
 }
 
 .btn-primary {
-  @apply bg-brand-600 hover:bg-brand-500 text-white font-bold py-4 px-8 rounded-2xl transition-all shadow-lg active:scale-95 disabled:opacity-50 relative overflow-hidden;
+  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-black py-4 px-10 rounded-3xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden;
 }
 
-.btn-primary::before {
+.btn-primary::after {
   content: '';
-  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent;
-  transform: translateX(-200%);
-  animation: shimmer 3s infinite;
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent;
+  transform: translateX(-100%);
+  animation: shimmer-light 3s infinite;
 }
 
 .card {
-  @apply glass rounded-[2.5rem] p-8 transition-all duration-300;
+  @apply glass rounded-[3rem] p-10;
 }

@@ -14,23 +14,25 @@ const Header: React.FC = () => {
     if (!role || !account) return null;
 
     return (
-        <header className="sticky top-0 z-40 bg-obsidian-950/80 backdrop-blur-2xl border-b border-white/5">
-            <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-20">
-                <div className="flex items-center gap-5">
-                    <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-brand-500/20">A</div>
+        <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-3xl border-b border-slate-100">
+            <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-24">
+                <div className="flex items-center gap-6">
+                    <div className="w-12 h-12 rounded-2xl bg-accent-indigo flex items-center justify-center font-black text-white text-xl shadow-lg shadow-indigo-500/30">A</div>
                     <div>
-                        <h1 className="text-base font-black tracking-tighter text-white hidden md:block uppercase">AKLASBELA-TV</h1>
-                        <p className="text-[10px] font-black text-neon-cyan tracking-[0.3em] uppercase">{role}</p>
+                        <h1 className="text-lg font-black tracking-tighter text-slate-900 hidden md:block uppercase">AKLASBELA-TV</h1>
+                        <p className="text-[10px] font-black text-accent-indigo tracking-[0.4em] uppercase">{role} ACCESS</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-8">
-                    <div className="hidden sm:flex items-center bg-black/40 px-6 py-2 rounded-full border border-white/5 shadow-inner">
-                        <span className="text-[11px] font-black text-white font-mono tracking-tighter uppercase mr-3 opacity-60">Balance</span>
-                        <span className="text-sm font-black text-white font-mono">PKR {account.wallet.toLocaleString()}</span>
+                <div className="flex items-center gap-10">
+                    <div className="hidden sm:flex items-center bg-slate-50 px-8 py-3 rounded-full border border-slate-100 shadow-inner">
+                        <span className="text-[12px] font-black text-slate-400 font-mono tracking-widest uppercase mr-4 opacity-70">Credits</span>
+                        <span className="text-base font-black text-slate-900 font-mono">PKR {account.wallet.toLocaleString()}</span>
                     </div>
-                    <button onClick={logout} className="text-[10px] font-black text-slate-500 hover:text-rose-500 uppercase tracking-widest transition-colors flex items-center gap-2 group">
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity">TERMINATE</span>
-                        {Icons.close}
+                    <button onClick={logout} className="text-[11px] font-black text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-all flex items-center gap-3 group">
+                        <span className="hidden group-hover:block transition-all">TERMINATE SESSION</span>
+                        <div className="p-2 bg-slate-50 rounded-full border border-slate-100 group-hover:bg-rose-50 group-hover:border-rose-100">
+                            {Icons.close}
+                        </div>
                     </button>
                 </div>
             </div>
@@ -49,7 +51,7 @@ const AppContent: React.FC = () => {
     const lastGamesRef = useRef<Game[]>([]);
 
     useEffect(() => {
-        document.title = role ? `${role} | Terminal` : `AKLASBELA-TV Exchange`;
+        document.title = role ? `${role} | Terminal` : `AKLASBELA-TV EXCHANGE`;
     }, [role]);
 
     const fetchPublicData = useCallback(async () => {
@@ -102,13 +104,14 @@ const AppContent: React.FC = () => {
     }, [games]);
 
     if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-obsidian-950">
-            <div className="text-brand-500 font-black text-2xl animate-pulse tracking-[0.5em] uppercase">LINKING...</div>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-white">
+            <div className="w-16 h-16 border-8 border-brand-100 border-t-brand-500 rounded-full animate-spin mb-6"></div>
+            <div className="text-slate-900 font-black text-2xl tracking-[0.8em] uppercase animate-pulse">Establishing Node Link...</div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-obsidian-950 selection:bg-neon-cyan selection:text-black">
+        <div className="min-h-screen bg-slate-50 selection:bg-brand-500 selection:text-white">
             <div className="animated-bg"></div>
             {!role || !account ? (
                 <LandingPage games={games.filter(g => g.isActive)} />
