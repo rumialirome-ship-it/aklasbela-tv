@@ -1,6 +1,6 @@
 module.exports = {
   apps : [{
-    name: "aklasbela-backend",
+    name: "aklasbela-exchange",
     script: "./server.js",
     exec_mode: "fork",
     autorestart: true,
@@ -8,7 +8,7 @@ module.exports = {
     max_memory_restart: '1G',
     env: {
       NODE_ENV: "production",
-      PORT: 3000,
+      PORT: 3005,
       JWT_SECRET: "aklasbela_tv_secure_salt_2024"
     }
   }]

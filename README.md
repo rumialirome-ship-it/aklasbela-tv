@@ -4,49 +4,51 @@ This application consists of two parts: the **Frontend** (Root) and the **Backen
 
 ---
 
-## 🏗️ 1. Build & Deploy Instructions
+## 🚀 1. Unique Port Deployment (Multiple Apps)
 
-Follow these steps exactly to avoid "Missing script" or "500" errors.
+Since you have other PM2 apps running, this app is configured to use **Port 3005**.
 
-### Step 1: Build the Interface (MUST BE IN ROOT)
+### Step 1: Clean start
 ```bash
-# Go to the main project folder
-cd /var/www/html/aklasbela-tv
+# Delete the old process if it exists
+pm2 delete aklasbela-backend
+pm2 delete aklasbela-exchange
+```
 
-# Install and build the frontend
-npm install
+### Step 2: Build (In Root)
+```bash
+cd /var/www/html/aklasbela-tv
 npm run build
 ```
-*Note: This creates the `dist` folder which contains your website.*
 
-### Step 2: Prepare Backend
+### Step 3: Start (In Backend)
 ```bash
-# Go into the backend folder
-cd /var/www/html/aklasbela-tv/backend
-
-# Install backend dependencies
-npm install
-
-# If you haven't setup the database yet:
-node setup-database.js
-```
-
-### Step 3: Start with PM2
-```bash
-# From inside the backend folder
+cd backend
 pm2 start ecosystem.config.js
-
-# To see logs and check for errors
-pm2 logs aklasbela-backend
 ```
 
 ---
 
-## 🛠️ 2. Troubleshooting "500 Internal Server Error"
+## 🔍 2. Troubleshooting Multi-App VPS
 
-If the website shows a 500 error:
-1.  **Check for 'dist'**: Ensure the folder `/var/www/html/aklasbela-tv/dist` exists and contains `index.html`.
-2.  **Check PM2 Logs**: Run `pm2 logs aklasbela-backend`. It will now print the exact path it is using to look for your files.
+If you still get a 500 error, another app might be using Port 3005.
+
+### Check what ports are used:
+```bash
+# List all processes using ports
+netstat -tuln | grep LISTEN
+```
+
+### Find the PID of an app on a port:
+```bash
+# Replace 3005 with the port you want to check
+lsof -i :3005
+```
+
+### View all PM2 apps:
+```bash
+pm2 list
+```
 
 ---
 
