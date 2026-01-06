@@ -31,7 +31,7 @@ function scheduleNextGameReset() {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aklasbela_tv_secure_salt_2024';
-const PORT = 3000; // STRICTLY 3000. DO NOT USE 3001 (OCCUPIED BY OTHER SITE)
+const PORT = 3000; // STRICTLY PORT 3000 - PORT 3001 IS USED BY ANOTHER SITE
 
 // Health Check
 app.get('/api/health', (req, res) => {
@@ -155,6 +155,13 @@ try {
     console.error('Critical database failure:', err);
 }
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[AKLASBELA-TV] Operational on port ${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[AKLASBELA-TV] Backend operational on port ${PORT}`);
+});
+
+server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+        console.error(`FATAL: Port ${PORT} is occupied. Run 'fuser -k ${PORT}/tcp' and restart PM2.`);
+        process.exit(1);
+    }
 });
