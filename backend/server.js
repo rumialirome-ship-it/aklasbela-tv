@@ -14,15 +14,10 @@ app.use(express.json());
 const JWT_SECRET = process.env.JWT_SECRET || 'aklasbela_tv_secure_salt_2024';
 const PORT = process.env.PORT || 3005;
 
-// --- DATABASE INTEGRITY CHECK ---
+// --- DIAGNOSTICS ---
 const DB_FILE = path.join(__dirname, 'database.sqlite');
-if (!fs.existsSync(DB_FILE)) {
-    console.error('--------------------------------------------------');
-    console.error('❌ FATAL: database.sqlite NOT FOUND!');
-    console.error('💡 RUN: "node setup-database.js" in the backend folder.');
-    console.error('--------------------------------------------------');
-    // We don't exit here so the process stays up and we can see logs
-}
+const DIST_PATH = path.resolve(__dirname, '../dist');
+const INDEX_HTML = path.join(DIST_PATH, 'index.html');
 
 // --- AUTOMATIC GAME RESET SCHEDULER (4:00 PM PKT) ---
 const PKT_OFFSET_HOURS = 5;
@@ -53,10 +48,9 @@ app.get('/api/health', (req, res) => {
         status: 'UP', 
         port: PORT,
         pid: process.pid,
-        uptime: process.uptime(),
         timestamp: new Date().toISOString(),
-        node: process.version,
-        database: fs.existsSync(DB_FILE) ? 'CONNECTED' : 'MISSING'
+        database: fs.existsSync(DB_FILE) ? 'CONNECTED' : 'MISSING',
+        ui_files: fs.existsSync(INDEX_HTML) ? 'READY' : 'NOT_FOUND'
     });
 });
 
@@ -71,7 +65,7 @@ app.post('/api/auth/login', (req, res) => {
         }
         res.status(401).json({ message: 'Invalid credentials.' });
     } catch (e) {
-        res.status(500).json({ message: 'Server error: Ensure DB is setup.' });
+        res.status(500).json({ message: 'Server error' });
     }
 });
 
@@ -111,32 +105,23 @@ app.post('/api/user/bets', authMiddleware, (req, res) => {
 });
 
 // --- STATIC FILES ---
-const distPath = path.resolve(__dirname, '../dist');
-const indexPath = path.join(distPath, 'index.html');
-
-app.use(express.static(distPath));
+app.use(express.static(DIST_PATH));
 
 app.get('*', (req, res) => {
-    // If it's an API request that reached here, it's a 404
     if (req.path.startsWith('/api')) return res.status(404).json({ message: 'API Route Not Found' });
 
-    // Try to serve index.html for SPA routing
-    if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
+    if (fs.existsSync(INDEX_HTML)) {
+        res.sendFile(INDEX_HTML);
     } else {
-        // This is a common cause of 500 errors if the build wasn't run
         res.status(500).send(`
-            <div style="background:#050101; color:#f43f5e; padding:40px; font-family:monospace; border:4px solid #f43f5e; border-radius: 20px; margin: 40px; box-shadow: 0 0 50px rgba(244,63,94,0.3);">
-                <h1 style="text-transform: uppercase; letter-spacing: 2px;">[SYSTEM ERROR] UI FILES NOT FOUND</h1>
-                <p>The backend is running, but the <b>dist</b> folder is missing.</p>
-                <hr style="border: 1px solid #f43f5e; opacity: 0.2; margin: 20px 0;">
-                <p><b>Solution:</b></p>
-                <ol>
-                    <li>Go to your project root: <code>cd /var/www/html/aklasbela-tv</code></li>
-                    <li>Run the build command: <code>npm run build</code></li>
-                    <li>Check that the folder exists: <code>ls -d dist</code></li>
-                </ol>
-                <p style="font-size: 12px; opacity: 0.6;">Path: ${indexPath}</p>
+            <div style="background:#050101; color:#f43f5e; padding:40px; font-family:monospace; border:4px solid #f43f5e; border-radius: 24px; margin: 40px; box-shadow: 0 0 60px rgba(244,63,94,0.2);">
+                <h1 style="letter-spacing: -1px; margin-bottom: 20px;">[500] MAIN OVERRIDE FAILURE</h1>
+                <p style="color: #fda4af;">The system is running on Port <b>${PORT}</b> but cannot find the <b>dist/index.html</b> file.</p>
+                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin: 20px 0;">
+                    <p style="margin: 0;"><b>REQUIRED ACTION:</b></p>
+                    <code style="display: block; margin-top: 10px; color: #fff;">cd /var/www/html/aklasbela-tv && npm run build</code>
+                </div>
+                <p style="font-size: 11px; opacity: 0.5;">Target Path: ${INDEX_HTML}</p>
             </div>
         `);
     }
@@ -152,19 +137,17 @@ try {
 
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log('--------------------------------------------------');
-    console.log(`🚀 AKLASBELA-TV EXCHANGE IS LIVE`);
+    console.log(`🚀 AKLASBELA-TV EXCHANGE SYSTEM ACTIVATED`);
     console.log(`📡 PORT: ${PORT}`);
     console.log(`🆔 PID:  ${process.pid}`);
     console.log(`🌐 URL:  https://aklasbela-tv.com`);
+    console.log(`📊 DB:   ${fs.existsSync(DB_FILE) ? 'OK' : 'MISSING'}`);
     console.log('--------------------------------------------------');
 });
 
 server.on('error', (e) => {
     if (e.code === 'EADDRINUSE') {
-        console.error('--------------------------------------------------');
-        console.error(`❌ FATAL: Port ${PORT} is already in use.`);
-        console.error(`💡 FIX: "sudo lsof -i :${PORT}" and then "sudo kill -9 <PID>"`);
-        console.error('--------------------------------------------------');
+        console.error(`❌ PORT ${PORT} IN USE. RUN: sudo kill -9 $(sudo lsof -t -i:${PORT})`);
         process.exit(1);
     }
 });
