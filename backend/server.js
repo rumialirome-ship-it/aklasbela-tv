@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aklasbela_tv_secure_salt_2024';
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // --- AUTOMATIC GAME RESET SCHEDULER (4:00 PM PKT) ---
 const PKT_OFFSET_HOURS = 5;
@@ -270,7 +270,11 @@ const distPath = path.resolve(__dirname, '../dist');
 const indexPath = path.join(distPath, 'index.html');
 
 console.log(`[INFO] Static files directory: ${distPath}`);
-console.log(`[INFO] Looking for index.html at: ${indexPath}`);
+if (fs.existsSync(distPath)) {
+    console.log(`[INFO] 'dist' folder found.`);
+} else {
+    console.warn(`[WARNING] 'dist' folder NOT FOUND at ${distPath}. Front-end will not load!`);
+}
 
 app.use(express.static(distPath));
 
@@ -283,15 +287,23 @@ app.get('*', (req, res) => {
     if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
     } else {
-        console.error(`[ERROR] index.html missing at ${indexPath}`);
         res.status(500).send(`
             <html>
-                <body style="font-family: sans-serif; background: #1a0505; color: #f7dee2; padding: 50px; text-align: center;">
-                    <h1>System Error: UI Files Not Found</h1>
-                    <p>The backend is healthy, but the frontend files are missing.</p>
-                    <p>Current backend directory: <code>${__dirname}</code></p>
-                    <p>Expected dist directory: <code>${distPath}</code></p>
-                    <p>Please run <code>npm run build</code> in the root folder (one level above backend).</p>
+                <body style="font-family: sans-serif; background: #0a0202; color: #fecdd3; padding: 50px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80vh;">
+                    <div style="max-width: 600px; border: 1px solid #881337; padding: 40px; border-radius: 24px; background: #450a0a20;">
+                        <h1 style="color: #e11d48; font-size: 3rem; margin-bottom: 10px;">500 Internal Error</h1>
+                        <h2 style="text-transform: uppercase; letter-spacing: 0.2em; font-size: 1rem; color: #fda4af;">Missing UI Build Files</h2>
+                        <hr style="border: none; border-top: 1px solid #881337; margin: 30px 0;" />
+                        <p style="text-align: left; line-height: 1.6;">The backend is running, but it cannot find the website files at:</p>
+                        <code style="display: block; background: black; padding: 15px; border-radius: 8px; font-family: monospace; color: #fb7185; margin: 15px 0; word-break: break-all;">${indexPath}</code>
+                        <p style="font-weight: bold; margin-top: 30px; color: white;">⚡ QUICK FIX:</p>
+                        <ol style="text-align: left; padding-left: 20px;">
+                            <li>SSH into your VPS.</li>
+                            <li>Navigate to the project root: <code>cd /var/www/html/aklasbela-tv/backend</code></li>
+                            <li>Run: <code style="color: #f43f5e">npm run build</code></li>
+                            <li>Then reload the app: <code>pm2 reload aklasbela-backend</code></li>
+                        </ol>
+                    </div>
                 </body>
             </html>
         `);

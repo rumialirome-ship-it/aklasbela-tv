@@ -1,4 +1,3 @@
-
 {
   "name": "aklasbela-tv-backend",
   "version": "1.0.0",
@@ -6,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "db:setup": "node setup-database.js"
+    "db:setup": "node setup-database.js",
+    "build": "cd .. && npm install && npm run build"
   },
   "dependencies": {
     "@google/genai": "^0.12.0",
