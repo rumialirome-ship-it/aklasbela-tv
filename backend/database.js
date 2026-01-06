@@ -1,4 +1,3 @@
-
 const path = require('path');
 const Database = require('better-sqlite3');
 const { v4: uuidv4 } = require('uuid');
@@ -11,36 +10,45 @@ const PKT_OFFSET_HOURS = 5;
 const OPEN_HOUR_PKT = 16; // 4:00 PM in Pakistan
 
 function getGameCycle(drawTime) {
-    const now = new Date(); // UTC
-    const [drawHoursPKT, drawMinutesPKT] = drawTime.split(':').map(Number);
-
-    const year = now.getUTCFullYear();
-    const month = now.getUTCMonth();
-    const day = now.getUTCDate();
-    
-    const openHourUTC = OPEN_HOUR_PKT - PKT_OFFSET_HOURS; // 11:00 AM UTC
-
-    const todayOpen = new Date(Date.UTC(year, month, day, openHourUTC, 0, 0));
-    const yesterdayOpen = new Date(todayOpen.getTime() - (24 * 60 * 60 * 1000));
-
-    const calculateCloseTime = (openDate) => {
-        const closeDate = new Date(openDate.getTime());
-        const drawHourUTC = drawHoursPKT - PKT_OFFSET_HOURS;
-        closeDate.setUTCHours(drawHourUTC, drawMinutesPKT, 0, 0);
-
-        if (drawHoursPKT < OPEN_HOUR_PKT) {
-            closeDate.setUTCDate(closeDate.getUTCDate() + 1);
-        }
-        return closeDate;
-    };
-
-    const yesterdayCycleClose = calculateCloseTime(yesterdayOpen);
-    if (now >= yesterdayOpen && now < yesterdayCycleClose) {
-        return { openTime: yesterdayOpen, closeTime: yesterdayCycleClose };
+    if (!drawTime || typeof drawTime !== 'string' || !drawTime.includes(':')) {
+        return { openTime: new Date(0), closeTime: new Date(0) };
     }
 
-    const todayCycleClose = calculateCloseTime(todayOpen);
-    return { openTime: todayOpen, closeTime: todayCycleClose };
+    try {
+        const now = new Date(); // UTC
+        const [drawHoursPKT, drawMinutesPKT] = drawTime.split(':').map(Number);
+
+        const year = now.getUTCFullYear();
+        const month = now.getUTCMonth();
+        const day = now.getUTCDate();
+        
+        const openHourUTC = OPEN_HOUR_PKT - PKT_OFFSET_HOURS; // 11:00 AM UTC
+
+        const todayOpen = new Date(Date.UTC(year, month, day, openHourUTC, 0, 0));
+        const yesterdayOpen = new Date(todayOpen.getTime() - (24 * 60 * 60 * 1000));
+
+        const calculateCloseTime = (openDate) => {
+            const closeDate = new Date(openDate.getTime());
+            const drawHourUTC = drawHoursPKT - PKT_OFFSET_HOURS;
+            closeDate.setUTCHours(drawHourUTC, drawMinutesPKT, 0, 0);
+
+            if (drawHoursPKT < OPEN_HOUR_PKT) {
+                closeDate.setUTCDate(closeDate.getUTCDate() + 1);
+            }
+            return closeDate;
+        };
+
+        const yesterdayCycleClose = calculateCloseTime(yesterdayOpen);
+        if (now >= yesterdayOpen && now < yesterdayCycleClose) {
+            return { openTime: yesterdayOpen, closeTime: yesterdayCycleClose };
+        }
+
+        const todayCycleClose = calculateCloseTime(todayOpen);
+        return { openTime: todayOpen, closeTime: todayCycleClose };
+    } catch (e) {
+        console.error('Date Calculation Error:', e);
+        return { openTime: new Date(0), closeTime: new Date(0) };
+    }
 }
 
 function isGameOpen(drawTime) {
@@ -54,7 +62,7 @@ const connect = () => {
         db = new Database(DB_PATH);
         db.pragma('journal_mode = WAL');
         db.pragma('foreign_keys = ON');
-        console.error('Database connected successfully.');
+        console.log('Database connected successfully.');
     } catch (error) {
         console.error('Failed to connect to database:', error);
         process.exit(1);
@@ -69,6 +77,7 @@ const verifySchema = () => {
             process.exit(1);
         }
     } catch (error) {
+        console.error('Schema verify error:', error);
         process.exit(1);
     }
 };
@@ -92,6 +101,7 @@ const findAccountById = (id, table) => {
 };
 
 const findAccountForLogin = (loginId) => {
+    if (!loginId) return { account: null, role: null };
     const lowerCaseLoginId = loginId.toLowerCase();
     const tables = [{ name: 'users', role: 'USER' }, { name: 'dealers', role: 'DEALER' }, { name: 'admins', role: 'ADMIN' }];
     for (const tableInfo of tables) {
@@ -310,9 +320,6 @@ const updateUser = (u, uId, dId) => {
     return findAccountById(u.id, 'users');
 };
 
-/**
- * Allows Admin to update any user without dealerId context.
- */
 const updateUserByAdmin = (u, uId) => {
     const existing = db.prepare('SELECT * FROM users WHERE LOWER(id) = LOWER(?)').get(uId);
     if (!existing) throw { status: 404, message: "User not found." };
@@ -495,7 +502,7 @@ function resetAllGames() {
         db.prepare('UPDATE games SET winningNumber = NULL, payoutsApproved = 0').run();
         db.prepare('DELETE FROM bets').run(); 
     });
-    console.error('--- [DATABASE] 4:00 PM PKT Boundary Reached. Market Restarted. ---');
+    console.log('--- [DATABASE] 4:00 PM PKT Boundary Reached. Market Restarted. ---');
 }
 
 module.exports = {

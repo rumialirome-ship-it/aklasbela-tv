@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('./authMiddleware');
 const database = require('./database');
@@ -32,9 +33,9 @@ function scheduleNextGameReset() {
 }
 
 const JWT_SECRET = process.env.JWT_SECRET || 'aklasbela_tv_secure_salt_2024';
-const PORT = 3000; // STRICTLY PORT 3000
+const PORT = 3000;
 
-// Health Check for monitoring
+// Health Check
 app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'UP', 
@@ -85,71 +86,60 @@ app.get('/api/auth/verify', authMiddleware, (req, res) => {
     }
 });
 
-// --- API ROUTES ---
+// --- API ---
 app.get('/api/games', (req, res) => {
     try { res.json(database.getAllFromTable('games')); }
-    catch (e) { res.status(500).json({ message: 'Failed to fetch games' }); }
+    catch (e) { 
+        console.error('API Error /api/games:', e);
+        res.status(500).json({ message: 'Failed to fetch games' }); 
+    }
 });
 
-app.get('/api/user/data', authMiddleware, (req, res) => {
-    if (req.user.role !== 'USER') return res.sendStatus(403);
-    res.json({ account: database.findAccountById(req.user.id, 'users'), games: database.getAllFromTable('games'), bets: database.findBetsByUserId(req.user.id) });
-});
-
-app.get('/api/dealer/data', authMiddleware, (req, res) => {
-    if (req.user.role !== 'DEALER') return res.sendStatus(403);
-    res.json({ account: database.findAccountById(req.user.id, 'dealers'), users: database.findUsersByDealerId(req.user.id), bets: database.findBetsByDealerId(req.user.id) });
-});
-
-app.get('/api/admin/data', authMiddleware, (req, res) => {
-    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
-    res.json({ account: database.findAccountById(req.user.id, 'admins'), dealers: database.getAllFromTable('dealers', true), users: database.getAllFromTable('users', true), games: database.getAllFromTable('games'), bets: database.getAllFromTable('bets') });
-});
-
-app.post('/api/user/bets', authMiddleware, (req, res) => {
-    if (req.user.role !== 'USER') return res.sendStatus(403);
-    try { res.status(201).json(database.placeBulkBets(req.user.id, req.body.gameId, req.body.betGroups, 'USER')); }
-    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
-});
-
-app.post('/api/dealer/bets/bulk', authMiddleware, (req, res) => {
-    if (req.user.role !== 'DEALER') return res.sendStatus(403);
-    try { res.status(201).json(database.placeBulkBets(req.body.userId, req.body.gameId, req.body.betGroups, 'DEALER')); }
-    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
-});
-
-app.post('/api/admin/games/:id/declare-winner', authMiddleware, (req, res) => {
-    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
-    try { res.json(database.declareWinnerForGame(req.params.id, req.body.winningNumber)); }
-    catch (e) { res.status(e.status || 500).json({ message: e.message }); }
-});
-
-// --- STATIC FILES (FRONTEND) ---
+// --- SERVE FRONTEND ---
 const distPath = path.join(__dirname, '../dist');
+const indexPath = path.join(distPath, 'index.html');
+
+// Log status of the dist folder on startup
+if (!fs.existsSync(distPath)) {
+    console.error(`[CRITICAL] Frontend directory NOT FOUND at: ${distPath}`);
+    console.error(`Please run 'npm run build' in the project root.`);
+} else if (!fs.existsSync(indexPath)) {
+    console.warn(`[WARNING] index.html NOT FOUND at: ${indexPath}`);
+}
+
 app.use(express.static(distPath));
 
-// Handle React SPA Routing (Always serve index.html for non-API routes)
+// Catch-all route to serve the SPA
 app.get('*', (req, res) => {
-    if (req.path.startsWith('/api')) return res.status(404).json({ message: 'API Not Found' });
-    res.sendFile(path.join(distPath, 'index.html'));
+    // Prevent catching API routes that don't exist
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ message: 'API endpoint not found' });
+    }
+
+    // Check if index.html exists before sending
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(500).send(`
+            <html>
+                <body style="font-family: sans-serif; background: #1a0505; color: #f7dee2; padding: 50px; text-align: center;">
+                    <h1>System Error: UI Missing</h1>
+                    <p>The backend is running, but the frontend files (dist folder) are missing.</p>
+                    <p>Run <code>npm run build</code> on the VPS to fix this.</p>
+                </body>
+            </html>
+        `);
+    }
 });
 
-// Start Server
+// Initialize DB and start
 try {
     database.connect();
     database.verifySchema();
 } catch (err) {
-    console.error('Database connection failed:', err);
+    console.error('Startup Error:', err);
 }
 
-const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`[AKLASBELA-TV] Operational on port ${PORT}`);
-    console.log(`[AKLASBELA-TV] Serving frontend from: ${distPath}`);
-});
-
-server.on('error', (e) => {
-    if (e.code === 'EADDRINUSE') {
-        console.error(`FATAL: Port ${PORT} is occupied by another process. Kill it or choose a different port.`);
-        process.exit(1);
-    }
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`[AKLASBELA-TV] Operational on Port ${PORT}`);
 });
