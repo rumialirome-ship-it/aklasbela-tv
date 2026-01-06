@@ -62,27 +62,26 @@ const connect = () => {
         db = new Database(DB_PATH);
         db.pragma('journal_mode = WAL');
         db.pragma('foreign_keys = ON');
-        console.log('Database connected successfully.');
+        console.log('[DB] SQLite connection established.');
     } catch (error) {
-        console.error('Failed to connect to database:', error);
-        process.exit(1);
+        console.error('[DB] Connection failed:', error);
     }
 };
 
 const verifySchema = () => {
+    if (!db) return;
     try {
         const stmt = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='admins'");
         if (!stmt.get()) {
-            console.error('Database schema missing. Run setup-database.js.');
-            process.exit(1);
+            console.warn('[DB-WARN] Schema missing tables. Run setup-database.js.');
         }
     } catch (error) {
-        console.error('Schema verify error:', error);
-        process.exit(1);
+        console.error('[DB-ERR] Schema check failed:', error);
     }
 };
 
 const findAccountById = (id, table) => {
+    if (!db) return null;
     const stmt = db.prepare(`SELECT * FROM ${table} WHERE LOWER(id) = LOWER(?)`);
     const account = stmt.get(id);
     if (!account) return null;
@@ -101,7 +100,7 @@ const findAccountById = (id, table) => {
 };
 
 const findAccountForLogin = (loginId) => {
-    if (!loginId) return { account: null, role: null };
+    if (!loginId || !db) return { account: null, role: null };
     const lowerCaseLoginId = loginId.toLowerCase();
     const tables = [{ name: 'users', role: 'USER' }, { name: 'dealers', role: 'DEALER' }, { name: 'admins', role: 'ADMIN' }];
     for (const tableInfo of tables) {
@@ -113,6 +112,7 @@ const findAccountForLogin = (loginId) => {
 };
 
 const updatePassword = (accountId, contact, newPassword) => {
+    if (!db) return false;
     const tables = ['users', 'dealers'];
     for (const table of tables) {
         const result = db.prepare(`UPDATE ${table} SET password = ? WHERE id = ? AND contact = ?`).run(newPassword, accountId, contact);
@@ -122,6 +122,7 @@ const updatePassword = (accountId, contact, newPassword) => {
 };
 
 const getAllFromTable = (table, withLedger = false) => {
+    if (!db) return [];
     return db.prepare(`SELECT * FROM ${table}`).all().map(acc => {
         try {
             if (withLedger && acc.id) acc.ledger = db.prepare('SELECT * FROM ledgers WHERE LOWER(accountId) = LOWER(?) ORDER BY timestamp ASC').all(acc.id);

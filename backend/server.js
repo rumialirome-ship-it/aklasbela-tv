@@ -14,6 +14,16 @@ app.use(express.json());
 const JWT_SECRET = process.env.JWT_SECRET || 'aklasbela_tv_secure_salt_2024';
 const PORT = process.env.PORT || 3005;
 
+// --- DATABASE INTEGRITY CHECK ---
+const DB_FILE = path.join(__dirname, 'database.sqlite');
+if (!fs.existsSync(DB_FILE)) {
+    console.error('--------------------------------------------------');
+    console.error('❌ FATAL: database.sqlite NOT FOUND!');
+    console.error('💡 RUN: "node setup-database.js" in the backend folder.');
+    console.error('--------------------------------------------------');
+    // We don't exit here so the process stays up and we can see logs
+}
+
 // --- AUTOMATIC GAME RESET SCHEDULER (4:00 PM PKT) ---
 const PKT_OFFSET_HOURS = 5;
 const RESET_HOUR_PKT = 16; 
@@ -46,7 +56,7 @@ app.get('/api/health', (req, res) => {
         uptime: process.uptime(),
         timestamp: new Date().toISOString(),
         node: process.version,
-        memory: process.memoryUsage()
+        database: fs.existsSync(DB_FILE) ? 'CONNECTED' : 'MISSING'
     });
 });
 
@@ -61,7 +71,7 @@ app.post('/api/auth/login', (req, res) => {
         }
         res.status(401).json({ message: 'Invalid credentials.' });
     } catch (e) {
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: 'Server error: Ensure DB is setup.' });
     }
 });
 
@@ -94,17 +104,6 @@ app.get('/api/games', (req, res) => {
     catch (e) { res.status(500).json({ message: 'Failed to fetch games' }); }
 });
 
-app.get('/api/user/data', authMiddleware, (req, res) => {
-    if (req.user.role !== 'USER') return res.sendStatus(403);
-    try {
-        res.json({ 
-            account: database.findAccountById(req.user.id, 'users'), 
-            games: database.getAllFromTable('games'), 
-            bets: database.findBetsByUserId(req.user.id) 
-        });
-    } catch (e) { res.status(500).json({ message: e.message }); }
-});
-
 app.post('/api/user/bets', authMiddleware, (req, res) => {
     if (req.user.role !== 'USER') return res.sendStatus(403);
     try { res.status(201).json(database.placeBulkBets(req.user.id, req.body.gameId, req.body.betGroups, 'USER')); }
@@ -118,16 +117,26 @@ const indexPath = path.join(distPath, 'index.html');
 app.use(express.static(distPath));
 
 app.get('*', (req, res) => {
+    // If it's an API request that reached here, it's a 404
     if (req.path.startsWith('/api')) return res.status(404).json({ message: 'API Route Not Found' });
 
+    // Try to serve index.html for SPA routing
     if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
     } else {
+        // This is a common cause of 500 errors if the build wasn't run
         res.status(500).send(`
-            <div style="background:#000; color:#f43f5e; padding:40px; font-family:monospace; border:2px solid #f43f5e;">
-                <h1>[SYSTEM ERROR] UI FILES NOT FOUND</h1>
-                <p>Path: ${indexPath}</p>
-                <p>Solution: Run <b>npm run build</b> in the root folder.</p>
+            <div style="background:#050101; color:#f43f5e; padding:40px; font-family:monospace; border:4px solid #f43f5e; border-radius: 20px; margin: 40px; box-shadow: 0 0 50px rgba(244,63,94,0.3);">
+                <h1 style="text-transform: uppercase; letter-spacing: 2px;">[SYSTEM ERROR] UI FILES NOT FOUND</h1>
+                <p>The backend is running, but the <b>dist</b> folder is missing.</p>
+                <hr style="border: 1px solid #f43f5e; opacity: 0.2; margin: 20px 0;">
+                <p><b>Solution:</b></p>
+                <ol>
+                    <li>Go to your project root: <code>cd /var/www/html/aklasbela-tv</code></li>
+                    <li>Run the build command: <code>npm run build</code></li>
+                    <li>Check that the folder exists: <code>ls -d dist</code></li>
+                </ol>
+                <p style="font-size: 12px; opacity: 0.6;">Path: ${indexPath}</p>
             </div>
         `);
     }
@@ -153,9 +162,8 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 server.on('error', (e) => {
     if (e.code === 'EADDRINUSE') {
         console.error('--------------------------------------------------');
-        console.error(`❌ FATAL: Port ${PORT} is already in use by another app.`);
-        console.error(`💡 FIX: Run "sudo lsof -i :${PORT}" to find the PID.`);
-        console.error(`💡 THEN: Run "sudo kill -9 <PID>" to free the port.`);
+        console.error(`❌ FATAL: Port ${PORT} is already in use.`);
+        console.error(`💡 FIX: "sudo lsof -i :${PORT}" and then "sudo kill -9 <PID>"`);
         console.error('--------------------------------------------------');
         process.exit(1);
     }
