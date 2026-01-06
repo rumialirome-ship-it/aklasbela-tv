@@ -1,41 +1,44 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
   --brand-primary: #6366f1;
-  --bg-light: #f8fafc;
+  --bg-light: #f1f5f9;
 }
 
 body {
-  font-family: 'Russo One', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   background-color: var(--bg-light);
-  color: #1e293b;
+  color: #334155;
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
 
-/* Bright Mesh Background */
+h1, h2, h3, h4, .font-display {
+  font-family: 'Syne', sans-serif;
+}
+
+/* Grayish Bright Mesh Background */
 .animated-bg {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(-45deg, #f8fafc, #e0f2fe, #f5f3ff, #f0f9ff);
+  background: linear-gradient(-45deg, #f1f5f9, #f8fafc, #e2e8f0, #cbd5e1);
   background-size: 400% 400%;
   animation: mesh-flow 15s ease infinite;
 }
 
-/* Bright Glassmorphism */
+/* Modern Glassmorphism */
 .glass {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05);
 }
 
 .circular-card {
-  @apply aspect-square rounded-full flex flex-col items-center justify-center p-8 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:shadow-indigo-500/10 active:scale-95;
+  @apply aspect-square rounded-full flex flex-col items-center justify-center p-8 transition-all duration-500 hover:scale-110 hover:shadow-2xl hover:shadow-indigo-500/10 active:scale-95;
 }
 
 /* Custom Scrollbar */
@@ -59,7 +62,8 @@ input, select, textarea {
 }
 
 .btn-primary {
-  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-black py-4 px-10 rounded-full transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden;
+  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-extrabold py-4 px-10 rounded-full transition-all shadow-xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden;
+  font-family: 'Syne', sans-serif;
 }
 
 .btn-primary::after {
@@ -79,4 +83,8 @@ input, select, textarea {
 
 .neon-glow-cyan {
   box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+}
+
+.text-mono {
+  font-family: 'Plus Jakarta Sans', monospace;
 }

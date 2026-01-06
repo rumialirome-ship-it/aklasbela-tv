@@ -1,4 +1,3 @@
-
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -9,6 +8,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        'sans': ['"Plus Jakarta Sans"', 'sans-serif'],
+        'display': ['Syne', 'sans-serif'],
+      },
       colors: {
         'brand': {
           50: '#f0f9ff',
@@ -36,7 +39,7 @@ export default {
         'shimmer-light': 'shimmer-light 2.5s linear infinite',
         'pulse-soft': 'pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'float': 'float 6s ease-in-out infinite',
-        'spin-slow': 'spin 8s linear infinite',
+        'spin-slow': 'spin 12s linear infinite',
       },
       keyframes: {
         'mesh-flow': {
