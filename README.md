@@ -1,73 +1,52 @@
 # 🎯 AKLASBELA-TV | VPS Deployment Guide
 
-This app is designed for simple, manual deployment. All automated sync scripts have been removed for maximum stability.
+This application is optimized for manual VPS deployment using PM2.
 
 ---
 
-## 🏗️ 1. Environment Requirements
-*   **Port**: 3000 (Strictly enforced for backend and frontend).
-*   **Node.js**: v18 or v20+ recommended.
-*   **Database**: SQLite3 (automatically handled).
+## 🏗️ 1. Environment Info
+*   **Target Port**: 3000
+*   **Process Name**: `aklasbela-backend`
+*   **Other Sites**: Safe (Port 3001 and others remain untouched)
 
 ---
 
-## 🚀 2. Step-by-Step Manual Deployment
+## 🚀 2. How to Update / Deploy
 
-Follow these 3 steps to get the app running:
+Follow these steps when you upload new code to the VPS:
 
-### Step 1: Prepare the Code
+### Step 1: Build the Interface
 ```bash
-# Pull latest code
-git pull origin main
-
-# Install root dependencies and build the interface
+# In the project root folder
 npm install
 npm run build
 ```
 
-### Step 2: Prepare the Backend
+### Step 2: Prepare Backend
 ```bash
 cd backend
-# Install backend dependencies
 npm install
-
-# Initialize the database (ONLY RUN ONCE OR WHEN DATA IS RESET)
-# WARNING: This will overwrite existing data if database.sqlite exists.
-node setup-database.js
+# Note: If database.sqlite is missing, run: node setup-database.js
 ```
 
-### Step 3: Start with PM2
+### Step 3: Manage with PM2
 ```bash
-# Start the process using the config file
+# To start fresh
 pm2 start ecosystem.config.js
 
-# To see logs if there is an error:
+# To reload changes
+pm2 reload aklasbela-backend
+
+# To check if it is running correctly
 pm2 logs aklasbela-backend
 ```
 
 ---
 
-## 🛠️ 3. Fix "500 Internal Server Error"
+## 🛠️ 3. Troubleshooting "500 Error"
 
-If you get a 500 error at the root URL, it usually means the `dist` folder is missing or PM2 is stuck.
-1. Run `npm run build` in the project root.
-2. Run `fuser -k 3000/tcp` to clear the port.
-3. Run `pm2 reload aklasbela-backend`.
+If you see a 500 error, ensure the `dist` folder exists in the project root. The backend serves your website from that folder. If `dist` is empty or missing, run `npm run build` again.
 
 ---
-
-## 🌐 4. Nginx Reverse Proxy (Optional)
-
-Nginx should simply point everything to Port 3000:
-```nginx
-location / {
-    proxy_pass http://localhost:3000;
-    proxy_http_version 1.1;
-    proxy_set_header Upgrade $http_upgrade;
-    proxy_set_header Connection 'upgrade';
-    proxy_set_header Host $host;
-    proxy_cache_bypass $http_upgrade;
-}
-```
 
 **AKLASBELA-TV EXCHANGE NETWORK**
