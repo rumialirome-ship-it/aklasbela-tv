@@ -14,20 +14,24 @@ const Header: React.FC = () => {
     if (!role || !account) return null;
 
     return (
-        <header className="sticky top-0 z-40 bg-obsidian-950/80 backdrop-blur-xl border-b border-white/5">
-            <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-16">
-                <div className="flex items-center gap-4">
-                    <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center font-black text-white text-xs">A</div>
+        <header className="sticky top-0 z-40 bg-obsidian-950/80 backdrop-blur-2xl border-b border-white/5">
+            <div className="max-w-7xl mx-auto px-6 flex justify-between items-center h-20">
+                <div className="flex items-center gap-5">
+                    <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-brand-500/20">A</div>
                     <div>
-                        <h1 className="text-sm font-black tracking-tight text-white hidden md:block uppercase">AKLASBELA-TV</h1>
-                        <p className="text-[9px] font-bold text-brand-500 tracking-widest uppercase">{role}</p>
+                        <h1 className="text-base font-black tracking-tighter text-white hidden md:block uppercase">AKLASBELA-TV</h1>
+                        <p className="text-[10px] font-black text-neon-cyan tracking-[0.3em] uppercase">{role}</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-6">
-                    <div className="hidden sm:flex items-center bg-white/5 px-4 py-1.5 rounded-full border border-white/5">
-                        <span className="text-[10px] font-black text-white font-mono">PKR {account.wallet.toLocaleString()}</span>
+                <div className="flex items-center gap-8">
+                    <div className="hidden sm:flex items-center bg-black/40 px-6 py-2 rounded-full border border-white/5 shadow-inner">
+                        <span className="text-[11px] font-black text-white font-mono tracking-tighter uppercase mr-3 opacity-60">Balance</span>
+                        <span className="text-sm font-black text-white font-mono">PKR {account.wallet.toLocaleString()}</span>
                     </div>
-                    <button onClick={logout} className="text-[10px] font-black text-obsidian-400 hover:text-red-500 uppercase tracking-widest transition-colors">Terminate</button>
+                    <button onClick={logout} className="text-[10px] font-black text-slate-500 hover:text-rose-500 uppercase tracking-widest transition-colors flex items-center gap-2 group">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity">TERMINATE</span>
+                        {Icons.close}
+                    </button>
                 </div>
             </div>
         </header>
@@ -99,12 +103,12 @@ const AppContent: React.FC = () => {
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-obsidian-950">
-            <div className="text-white font-black text-xl animate-pulse tracking-widest uppercase">Initializing Exchange...</div>
+            <div className="text-brand-500 font-black text-2xl animate-pulse tracking-[0.5em] uppercase">LINKING...</div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-obsidian-950 selection:bg-brand-600 selection:text-white">
+        <div className="min-h-screen bg-obsidian-950 selection:bg-neon-cyan selection:text-black">
             <div className="animated-bg"></div>
             {!role || !account ? (
                 <LandingPage games={games.filter(g => g.isActive)} />
