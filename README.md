@@ -1,51 +1,52 @@
 # 🎯 AKLASBELA-TV | VPS Deployment Guide
 
-This application is optimized for manual VPS deployment using PM2.
+This application consists of two parts: the **Frontend** (Root) and the **Backend** (backend folder).
 
 ---
 
-## 🏗️ 1. Environment Info
-*   **Target Port**: 3000
-*   **Process Name**: `aklasbela-backend`
-*   **Other Sites**: Safe (Port 3001 and others remain untouched)
+## 🏗️ 1. Build & Deploy Instructions
 
----
+Follow these steps exactly to avoid "Missing script" or "500" errors.
 
-## 🚀 2. How to Update / Deploy
-
-Follow these steps when you upload new code to the VPS:
-
-### Step 1: Build the Interface
+### Step 1: Build the Interface (MUST BE IN ROOT)
 ```bash
-# In the project root folder
+# Go to the main project folder
+cd /var/www/html/aklasbela-tv
+
+# Install and build the frontend
 npm install
 npm run build
 ```
+*Note: This creates the `dist` folder which contains your website.*
 
 ### Step 2: Prepare Backend
 ```bash
-cd backend
+# Go into the backend folder
+cd /var/www/html/aklasbela-tv/backend
+
+# Install backend dependencies
 npm install
-# Note: If database.sqlite is missing, run: node setup-database.js
+
+# If you haven't setup the database yet:
+node setup-database.js
 ```
 
-### Step 3: Manage with PM2
+### Step 3: Start with PM2
 ```bash
-# To start fresh
+# From inside the backend folder
 pm2 start ecosystem.config.js
 
-# To reload changes
-pm2 reload aklasbela-backend
-
-# To check if it is running correctly
+# To see logs and check for errors
 pm2 logs aklasbela-backend
 ```
 
 ---
 
-## 🛠️ 3. Troubleshooting "500 Error"
+## 🛠️ 2. Troubleshooting "500 Internal Server Error"
 
-If you see a 500 error, ensure the `dist` folder exists in the project root. The backend serves your website from that folder. If `dist` is empty or missing, run `npm run build` again.
+If the website shows a 500 error:
+1.  **Check for 'dist'**: Ensure the folder `/var/www/html/aklasbela-tv/dist` exists and contains `index.html`.
+2.  **Check PM2 Logs**: Run `pm2 logs aklasbela-backend`. It will now print the exact path it is using to look for your files.
 
 ---
 

@@ -269,6 +269,9 @@ app.put('/api/admin/games/:id/draw-time', authMiddleware, (req, res) => {
 const distPath = path.resolve(__dirname, '../dist');
 const indexPath = path.join(distPath, 'index.html');
 
+console.log(`[INFO] Static files directory: ${distPath}`);
+console.log(`[INFO] Looking for index.html at: ${indexPath}`);
+
 app.use(express.static(distPath));
 
 // Catch-all route to serve the SPA
@@ -280,12 +283,15 @@ app.get('*', (req, res) => {
     if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
     } else {
+        console.error(`[ERROR] index.html missing at ${indexPath}`);
         res.status(500).send(`
             <html>
                 <body style="font-family: sans-serif; background: #1a0505; color: #f7dee2; padding: 50px; text-align: center;">
                     <h1>System Error: UI Files Not Found</h1>
-                    <p>The backend is healthy, but the frontend files are missing at: <code>${indexPath}</code></p>
-                    <p>Run <code>npm run build</code> in the project root to generate the dist folder.</p>
+                    <p>The backend is healthy, but the frontend files are missing.</p>
+                    <p>Current backend directory: <code>${__dirname}</code></p>
+                    <p>Expected dist directory: <code>${distPath}</code></p>
+                    <p>Please run <code>npm run build</code> in the root folder (one level above backend).</p>
                 </body>
             </html>
         `);
