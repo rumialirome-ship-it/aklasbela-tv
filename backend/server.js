@@ -42,9 +42,11 @@ app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'UP', 
         port: PORT,
-        processId: process.pid,
+        pid: process.pid,
+        uptime: process.uptime(),
         timestamp: new Date().toISOString(),
-        node: process.version
+        node: process.version,
+        memory: process.memoryUsage()
     });
 });
 
@@ -144,16 +146,16 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 AKLASBELA-TV EXCHANGE IS LIVE`);
     console.log(`📡 PORT: ${PORT}`);
     console.log(`🆔 PID:  ${process.pid}`);
-    console.log(`🌐 URL:  http://localhost:${PORT}`);
+    console.log(`🌐 URL:  https://aklasbela-tv.com`);
     console.log('--------------------------------------------------');
 });
 
 server.on('error', (e) => {
     if (e.code === 'EADDRINUSE') {
         console.error('--------------------------------------------------');
-        console.error(`❌ FATAL: Port ${PORT} is already in use!`);
-        console.error(`💡 FIX: Run "lsof -i :${PORT}" to find the process.`);
-        console.error(`💡 THEN: Run "kill -9 <PID>" or "fuser -k ${PORT}/tcp"`);
+        console.error(`❌ FATAL: Port ${PORT} is already in use by another app.`);
+        console.error(`💡 FIX: Run "sudo lsof -i :${PORT}" to find the PID.`);
+        console.error(`💡 THEN: Run "sudo kill -9 <PID>" to free the port.`);
         console.error('--------------------------------------------------');
         process.exit(1);
     }

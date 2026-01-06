@@ -10,6 +10,10 @@ module.exports = {
       NODE_ENV: "production",
       PORT: 3005,
       JWT_SECRET: "aklasbela_tv_secure_salt_2024"
+    },
+    env_production: {
+      NODE_ENV: "production",
+      PORT: 3005
     }
   }]
 }

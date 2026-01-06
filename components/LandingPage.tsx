@@ -50,7 +50,7 @@ const GameDisplayCard: React.FC<{ game: Game; onClick: () => void }> = ({ game, 
             onClick={onClick}
             className="relative group bg-evening-red-950/40 p-6 flex flex-col items-center justify-between text-center transition-all duration-500 border border-rose-900/20 w-full overflow-hidden focus:outline-none focus:ring-2 focus:ring-evening-red-500 rounded-3xl"
         >
-            <div className="absolute inset-0 bg-gradient-to-br from-evening-red-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-evening-red-900/10 to-transparent opacity-0 group-hover:opacity-10 transition-opacity"></div>
             <div className="relative z-10 w-full flex flex-col h-full">
                 <div className="flex-grow">
                     <img src={logo} alt={game.name} className="w-20 h-20 rounded-full mb-4 border-2 border-rose-900/50 group-hover:border-evening-red-500 transition-all mx-auto shadow-2xl" />
@@ -86,7 +86,7 @@ const GameDisplayCard: React.FC<{ game: Game; onClick: () => void }> = ({ game, 
 
 const WhatsAppButton: React.FC = () => (
     <a 
-        href="https://wa.me/923000000000" // Replace with your actual WhatsApp number
+        href="https://wa.me/923000000000" 
         target="_blank" 
         rel="noopener noreferrer"
         className="fixed bottom-8 right-8 z-[100] bg-green-500 hover:bg-green-400 text-white p-5 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all hover:scale-110 flex items-center justify-center group"
@@ -124,15 +124,15 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
             <div className="max-w-7xl mx-auto px-6 w-full flex-grow">
                 <header className="text-center py-16 md:py-24">
                     <div className="inline-block relative">
-                        <h1 className="text-7xl md:text-9xl font-black mb-4 tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-rose-50 to-evening-red-700">AKLASBELA</h1>
-                        <div className="absolute -top-6 -right-12 bg-evening-red-600 text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-[0.3em] shadow-lg animate-pulse">Live Broadcast</div>
+                        <h1 className="text-7xl md:text-9xl font-black mb-4 tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-rose-50 to-evening-red-700 uppercase">AKLASBELA</h1>
+                        <div className="absolute -top-6 -right-12 bg-evening-red-600 text-white text-[8px] font-black px-2 py-1 rounded uppercase tracking-[0.3em] shadow-lg animate-pulse">Live Terminal</div>
                     </div>
                     <h2 className="text-2xl md:text-3xl font-bold text-evening-red-600 uppercase tracking-[0.8em] mb-6">TV EXCHANGE</h2>
                     
                     <div className="flex items-center justify-center gap-2 mb-8">
                         <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]"></span>
                         <p className="text-rose-300/60 font-black uppercase tracking-widest text-[10px] italic">
-                            Official Domain Verified: aklasbela-tv.com
+                            Verified Node: aklasbela-tv.com
                         </p>
                     </div>
                 </header>
@@ -141,7 +141,7 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
                     <div className="lg:col-span-1 bg-evening-red-950/20 border border-rose-900/10 p-10 rounded-[2.5rem] shadow-2xl backdrop-blur-3xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-evening-red-600/5 blur-3xl group-hover:bg-evening-red-600/10 transition-all"></div>
                         <div className="flex items-center justify-between mb-10 border-b border-rose-900/10 pb-6">
-                            <h2 className="text-xl font-black uppercase tracking-[0.2em]">Secure Node</h2>
+                            <h2 className="text-xl font-black uppercase tracking-[0.2em]">Secure Access</h2>
                             <div className="flex gap-1">
                                 <div className="w-1 h-1 rounded-full bg-red-600"></div>
                                 <div className="w-1 h-1 rounded-full bg-red-600"></div>
@@ -151,22 +151,22 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
                         
                         <form onSubmit={handleLogin} className="space-y-8">
                             <div>
-                                <label className="block text-[9px] font-black text-rose-500 uppercase tracking-[0.4em] mb-3">Account Terminal ID</label>
+                                <label className="block text-[9px] font-black text-rose-500 uppercase tracking-[0.4em] mb-3">Terminal Identity ID</label>
                                 <input 
                                   type="text" 
                                   value={loginId}
                                   onChange={e => setLoginId(e.target.value)}
-                                  className="w-full bg-black/40 border border-rose-900/20 p-5 rounded-2xl focus:border-evening-red-500 focus:outline-none transition-all font-mono placeholder:text-rose-950/40"
+                                  className="w-full bg-black/40 border border-rose-900/20 p-5 rounded-2xl focus:border-evening-red-500 focus:outline-none transition-all font-mono text-rose-50 placeholder:text-rose-950/40"
                                   placeholder="E.G. ADU-001"
                                 />
                             </div>
                             <div>
-                                <label className="block text-[9px] font-black text-rose-500 uppercase tracking-[0.4em] mb-3">Security Access Key</label>
+                                <label className="block text-[9px] font-black text-rose-500 uppercase tracking-[0.4em] mb-3">Security Protocol Key</label>
                                 <input 
                                   type="password" 
                                   value={password}
                                   onChange={e => setPassword(e.target.value)}
-                                  className="w-full bg-black/40 border border-rose-900/20 p-5 rounded-2xl focus:border-evening-red-500 focus:outline-none transition-all font-mono placeholder:text-rose-950/40"
+                                  className="w-full bg-black/40 border border-rose-900/20 p-5 rounded-2xl focus:border-evening-red-500 focus:outline-none transition-all font-mono text-rose-50 placeholder:text-rose-950/40"
                                   placeholder="••••••••"
                                 />
                             </div>
@@ -180,14 +180,14 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
                                 disabled={isSubmitting}
                                 className="w-full bg-evening-red-600 hover:bg-evening-red-500 text-white font-black py-6 rounded-2xl uppercase tracking-[0.5em] text-[10px] transition-all shadow-2xl shadow-evening-red-900/40 disabled:opacity-50"
                             >
-                                {isSubmitting ? 'CONNECTING...' : 'INITIATE AUTH'}
+                                {isSubmitting ? 'CONNECTING...' : 'INITIATE TERMINAL'}
                             </button>
                         </form>
                     </div>
 
                     <div className="lg:col-span-2 space-y-12">
                         <div className="flex items-center gap-6">
-                            <h2 className="text-xl font-black text-rose-50 uppercase tracking-[0.3em]">Operational Channels</h2>
+                            <h2 className="text-xl font-black text-rose-50 uppercase tracking-[0.3em]">Live Feed Status</h2>
                             <div className="h-px flex-grow bg-rose-900/10"></div>
                             <span className="flex items-center gap-2 text-[9px] font-black text-green-500 uppercase tracking-widest">
                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
@@ -207,16 +207,16 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
                 </div>
 
                 <footer className="text-center py-16 text-rose-950 font-black uppercase tracking-[0.5em] text-[10px] border-t border-rose-900/10">
-                    <div className="mb-4 flex justify-center items-center gap-8">
-                        <span>Terminal v2.1.0</span>
+                    <div className="mb-4 flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8">
+                        <span>Terminal Build v2.5.0-STABLE</span>
                         <div className="flex items-center gap-1 text-rose-900">
                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                              </svg>
-                             <span>aklasbela-tv.com</span>
+                             <span>Node verified on port 3005</span>
                         </div>
                     </div>
-                    &copy; {new Date().getFullYear()} AKLASBELA-TV EXCHANGE NETWORK
+                    &copy; {new Date().getFullYear()} AKLASBELA-TV EXCHANGE STRATEGIC COMMAND
                 </footer>
             </div>
         </div>
