@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Role, User, Dealer, Admin, Game, Bet, LedgerEntry, SubGameType, PrizeRates } from './types';
+import { Role, User, Dealer, Admin, Game, Bet } from './types';
 import { Icons, GAME_LOGOS } from './constants';
 import LandingPage from './components/LandingPage';
 import AdminPanel from './components/AdminPanel';
@@ -14,23 +14,23 @@ const Header: React.FC = () => {
     if (!role || !account) return null;
 
     return (
-        <header className="sticky top-0 z-40 bg-white/60 backdrop-blur-3xl border-b border-slate-100 shadow-sm">
-            <div className="max-w-7xl mx-auto px-8 flex justify-between items-center h-28">
-                <div className="flex items-center gap-8">
-                    <div className="w-16 h-16 rounded-full bg-accent-indigo flex items-center justify-center font-black text-white text-3xl shadow-2xl shadow-indigo-500/30 border-4 border-white transition-transform hover:scale-110">A</div>
+        <header className="sticky top-0 z-40 bg-white/70 backdrop-blur-3xl border-b border-slate-200/50 shadow-sm">
+            <div className="max-w-7xl mx-auto px-10 flex justify-between items-center h-32">
+                <div className="flex items-center gap-10 group">
+                    <div className="w-20 h-20 rounded-full bg-accent-indigo flex items-center justify-center font-black text-white text-4xl shadow-2xl shadow-indigo-500/40 border-4 border-white transition-all group-hover:scale-110 group-hover:rotate-12 cursor-pointer">AB</div>
                     <div>
-                        <h1 className="text-2xl font-black tracking-tighter text-slate-900 hidden md:block uppercase leading-none">AKLASBELA<span className="text-accent-indigo">.</span>TV</h1>
-                        <p className="text-[11px] font-black text-slate-400 tracking-[0.6em] uppercase mt-2">{role} ENVIRONMENT</p>
+                        <h1 className="text-3xl font-black tracking-tighter text-slate-900 hidden md:block uppercase leading-none">AKLASBELA<span className="text-accent-indigo">.</span>TV</h1>
+                        <p className="text-[12px] font-black text-slate-400 tracking-[0.8em] uppercase mt-3 opacity-60">{role} ENVIRONMENT</p>
                     </div>
                 </div>
-                <div className="flex items-center gap-12">
-                    <div className="hidden sm:flex items-center bg-slate-50 px-10 py-4 rounded-full border border-slate-100 shadow-inner">
-                        <span className="text-[13px] font-black text-slate-400 font-mono tracking-[0.3em] uppercase mr-6 opacity-80">Credits</span>
-                        <span className="text-xl font-black text-slate-900 font-mono tracking-tight">PKR {account.wallet.toLocaleString()}</span>
+                <div className="flex items-center gap-14">
+                    <div className="hidden sm:flex items-center bg-slate-100/50 px-12 py-5 rounded-full border border-slate-200/50 shadow-inner">
+                        <span className="text-[14px] font-black text-slate-400 font-mono tracking-[0.4em] uppercase mr-8 opacity-70">Credits</span>
+                        <span className="text-2xl font-black text-slate-900 font-mono tracking-tighter">PKR {account.wallet.toLocaleString()}</span>
                     </div>
-                    <button onClick={logout} className="text-[12px] font-black text-slate-400 hover:text-rose-500 uppercase tracking-[0.4em] transition-all flex items-center gap-4 group">
-                        <span className="hidden group-hover:block transition-all opacity-0 group-hover:opacity-100">LOGOUT</span>
-                        <div className="p-3 bg-white rounded-full border border-slate-200 group-hover:bg-rose-50 group-hover:border-rose-100 shadow-sm">
+                    <button onClick={logout} className="text-[13px] font-black text-slate-400 hover:text-rose-500 uppercase tracking-[0.6em] transition-all flex items-center gap-5 group">
+                        <span className="hidden group-hover:block transition-all opacity-0 group-hover:opacity-100">TERMINATE</span>
+                        <div className="p-4 bg-white rounded-full border border-slate-200 group-hover:bg-rose-50 group-hover:border-rose-100 shadow-sm group-hover:scale-110">
                             {Icons.close}
                         </div>
                     </button>
@@ -41,17 +41,16 @@ const Header: React.FC = () => {
 };
 
 const AppContent: React.FC = () => {
-    const { role, account, loading, fetchWithAuth, verifyData, setAccount } = useAuth();
+    const { role, account, loading, fetchWithAuth, setAccount } = useAuth();
     const [users, setUsers] = useState<User[]>([]);
     const [dealers, setDealers] = useState<Dealer[]>([]);
     const [games, setGames] = useState<Game[]>([]);
     const [bets, setBets] = useState<Bet[]>([]);
-    const [hasInitialFetched, setHasInitialFetched] = useState(false);
     const [activeReveal, setActiveReveal] = useState<{ name: string; number: string } | null>(null);
     const lastGamesRef = useRef<Game[]>([]);
 
     useEffect(() => {
-        document.title = role ? `${role} Terminal | AKLASBELA.TV` : `AKLASBELA.TV | Digital Exchange`;
+        document.title = role ? `${role} Terminal | AKLASBELA.TV` : `AKLASBELA.TV | Digital Lottery`;
     }, [role]);
 
     const fetchPublicData = useCallback(async () => {
@@ -75,7 +74,6 @@ const AppContent: React.FC = () => {
                 if (data.users) setUsers(data.users);
                 if (data.dealers) setDealers(data.dealers);
                 if (data.bets) setBets(data.bets);
-                setHasInitialFetched(true);
             }
         } catch (e) {}
     }, [role, fetchWithAuth, setAccount]);
@@ -98,7 +96,6 @@ const AppContent: React.FC = () => {
         if (games.length > 0 && lastGamesRef.current.length > 0) {
             games.forEach(ng => {
                 const og = lastGamesRef.current.find(g => g.id === ng.id);
-                // Simple check for new winners
                 if (ng.winningNumber && !ng.winningNumber.endsWith('_') && (!og?.winningNumber || og.winningNumber.endsWith('_'))) {
                     setActiveReveal({ name: ng.name, number: ng.winningNumber });
                 }
@@ -108,17 +105,17 @@ const AppContent: React.FC = () => {
     }, [games]);
 
     if (loading) return (
-        <div className="min-h-screen flex flex-col items-center justify-center bg-white overflow-hidden relative">
-            <div className="absolute top-0 left-0 w-full h-1 bg-indigo-500/10">
-                <div className="h-full bg-indigo-500 w-1/4 animate-shimmer-light"></div>
+        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 overflow-hidden relative">
+            <div className="absolute top-0 left-0 w-full h-2 bg-slate-100">
+                <div className="h-full bg-accent-indigo w-1/4 animate-shimmer-light"></div>
             </div>
-            <div className="w-24 h-24 border-8 border-slate-100 border-t-accent-indigo rounded-full animate-spin mb-10 shadow-2xl shadow-indigo-500/10"></div>
-            <div className="text-slate-900 font-black text-3xl tracking-[1em] uppercase animate-pulse drop-shadow-sm">Synchronizing Node...</div>
+            <div className="w-32 h-32 border-[12px] border-slate-100 border-t-accent-indigo rounded-full animate-spin mb-12 shadow-2xl shadow-indigo-500/20"></div>
+            <div className="text-slate-900 font-black text-4xl tracking-[1.2em] uppercase animate-pulse">DECRYPTING...</div>
         </div>
     );
 
     return (
-        <div className="min-h-screen bg-slate-50 selection:bg-brand-500 selection:text-white transition-colors duration-1000">
+        <div className="min-h-screen selection:bg-accent-indigo selection:text-white transition-colors duration-1000">
             <div className="animated-bg"></div>
             {!role || !account ? (
                 <LandingPage games={games.filter(g => g.isActive)} />

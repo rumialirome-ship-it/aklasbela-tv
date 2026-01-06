@@ -1,3 +1,4 @@
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -14,17 +15,17 @@ export default {
       },
       colors: {
         'brand': {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-          950: '#082f49',
+          50: '#f8fafc',
+          100: '#f1f5f9',
+          200: '#e2e8f0',
+          300: '#cbd5e1',
+          400: '#94a3b8',
+          500: '#64748b',
+          600: '#475569',
+          700: '#334155',
+          800: '#1e293b',
+          900: '#0f172a',
+          950: '#020617',
         },
         'accent': {
           indigo: '#6366f1',
@@ -35,11 +36,11 @@ export default {
         }
       },
       animation: {
-        'mesh-flow': 'mesh-flow 15s ease infinite',
+        'mesh-flow': 'mesh-flow 18s ease-in-out infinite',
         'shimmer-light': 'shimmer-light 2.5s linear infinite',
-        'pulse-soft': 'pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'float': 'float 6s ease-in-out infinite',
-        'spin-slow': 'spin 12s linear infinite',
+        'pulse-soft': 'pulse-soft 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'rotate-slow': 'spin 12s linear infinite',
+        'float': 'float 5s ease-in-out infinite',
       },
       keyframes: {
         'mesh-flow': {
@@ -52,11 +53,11 @@ export default {
         },
         'pulse-soft': {
           '0%, 100%': { opacity: '1', transform: 'scale(1)' },
-          '50%': { opacity: '0.7', transform: 'scale(1.05)' },
+          '50%': { opacity: '0.8', transform: 'scale(1.03)' },
         },
         'float': {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-10px)' },
+          '50%': { transform: 'translateY(-12px)' },
         }
       }
     },
