@@ -10,50 +10,40 @@ export default {
   theme: {
     extend: {
       colors: {
-        'rose-quartz': {
-          50: '#fdf8f8',
-          100: '#fbeff1',
-          200: '#f7dee2',
-          300: '#efc1c9',
-          400: '#e49aa7',
-          500: '#d47588',
-          600: '#c0566d',
-          700: '#a14256',
-          800: '#863a4a',
-          900: '#723442',
-          950: '#401921',
+        'brand': {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+          950: '#451a03',
         },
-        'evening-red': {
-          50: '#fff1f2',
-          100: '#ffe4e6',
-          200: '#fecdd3',
-          300: '#fda4af',
-          400: '#fb7185',
-          500: '#f43f5e',
-          600: '#e11d48',
-          700: '#be123c',
-          800: '#9f1239',
-          900: '#881337',
-          950: '#450a0a',
-        }
+        'obsidian': {
+          50: '#f4f4f5',
+          100: '#e4e4e7',
+          400: '#9ca3af',
+          800: '#18181b',
+          900: '#0f0f12',
+          950: '#060608',
+        },
       },
       animation: {
-        'portal-pulse': 'portal-pulse 4s ease-in-out infinite',
-        'swing-down': 'swing-down 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
-        'blink-fast': 'blink 0.3s linear infinite',
+        'float': 'float 6s ease-in-out infinite',
+        'shimmer': 'shimmer 2s linear infinite',
       },
       keyframes: {
-        'portal-pulse': {
-          '0%, 100%': { transform: 'scale(1)', opacity: '0.8' },
-          '50%': { transform: 'scale(1.05)', opacity: '1' },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
         },
-        'swing-down': {
-          '0%': { transform: 'translateY(-100px) scale(0)', opacity: '0' },
-          '100%': { transform: 'translateY(0) scale(1)', opacity: '1' },
-        },
-        'blink': {
-          '0%, 100%': { opacity: '1' },
-          '50%': { opacity: '0.3' },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
         }
       }
     },
