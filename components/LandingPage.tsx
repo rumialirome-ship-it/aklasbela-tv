@@ -42,34 +42,34 @@ const GameNodeOrb: React.FC<{ game: Game }> = ({ game }) => {
     const logo = GAME_LOGOS[game.name] || '';
 
     return (
-        <div className="group relative circular-game-card p-8 sm:p-12">
+        <div className="group relative circular-game-card p-6 sm:p-10 md:p-12">
             {/* Pulsing ring for active sessions */}
             {!hasResult && !isClosed && countdown.status === 'OPEN' && (
-                <div className="absolute inset-0 border-2 border-accent-indigo/30 rounded-full animate-pulse-glow"></div>
+                <div className="absolute inset-0 border-2 border-accent-indigo/40 rounded-full animate-pulse-glow"></div>
             )}
             
-            <div className="relative mb-6 sm:mb-8 w-20 h-20 sm:w-32 sm:h-32 z-10 shrink-0">
+            <div className="relative mb-4 sm:mb-6 md:mb-8 w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 z-10 shrink-0">
                 <div className="absolute inset-0 bg-accent-indigo/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 <img src={logo} alt={game.name} className="relative w-full h-full rounded-full border border-white/10 p-1.5 bg-slate-900 group-hover:scale-110 transition-transform duration-700 shadow-2xl" />
             </div>
 
             <div className="text-center relative z-10 w-full px-2">
-                <h3 className="text-sm sm:text-xl font-bold text-white mb-2 uppercase tracking-tight group-hover:text-accent-indigo transition-colors duration-500">{game.name}</h3>
+                <h3 className="text-xs sm:text-sm md:text-xl font-bold text-white mb-1 md:mb-2 uppercase tracking-tight group-hover:text-accent-indigo transition-colors duration-500">{game.name}</h3>
                 
                 {hasResult ? (
                     <div className="mt-1">
-                        <span className="text-[9px] uppercase tracking-[0.4em] text-accent-emerald font-black">WINNER</span>
-                        <div className="text-2xl sm:text-5xl font-mono font-black text-white leading-none tracking-tighter">{game.winningNumber}</div>
+                        <span className="text-[8px] md:text-[9px] uppercase tracking-[0.4em] text-accent-emerald font-black">WINNER</span>
+                        <div className="text-xl sm:text-3xl md:text-5xl font-mono font-black text-white leading-none tracking-tighter">{game.winningNumber}</div>
                     </div>
                 ) : isClosed ? (
-                    <div className="mt-4 py-2 px-6 bg-white/5 rounded-xl text-[10px] font-bold text-slate-500 uppercase tracking-widest border border-white/5">Closed</div>
+                    <div className="mt-3 py-1.5 px-4 bg-white/5 rounded-xl text-[9px] font-bold text-slate-500 uppercase tracking-widest border border-white/5">Closed</div>
                 ) : (
                     <div className="mt-1">
-                        <div className={`text-xl sm:text-4xl font-mono font-black tracking-tighter leading-none ${countdown.status === 'OPEN' ? 'text-accent-indigo' : 'text-slate-600'}`}>
+                        <div className={`text-base sm:text-2xl md:text-4xl font-mono font-black tracking-tighter leading-none ${countdown.status === 'OPEN' ? 'text-accent-indigo' : 'text-slate-600'}`}>
                             {countdown.text}
                         </div>
-                        <div className="text-[9px] sm:text-[11px] uppercase tracking-[0.4em] text-slate-500 font-bold mt-3 opacity-60">
-                           Draw {formatTime12h(game.drawTime)}
+                        <div className="text-[10px] sm:text-[12px] md:text-[14px] uppercase tracking-[0.3em] text-white font-black mt-2 opacity-90">
+                           {formatTime12h(game.drawTime)}
                         </div>
                     </div>
                 )}

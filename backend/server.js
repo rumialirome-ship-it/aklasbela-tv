@@ -99,9 +99,138 @@ app.get('/api/games', (req, res) => {
     catch (e) { res.status(500).json({ message: 'Failed to fetch games' }); }
 });
 
+// --- USER ROUTES ---
+app.get('/api/user/data', authMiddleware, (req, res) => {
+    if (req.user.role !== 'USER') return res.sendStatus(403);
+    const account = database.findAccountById(req.user.id, 'users');
+    const bets = database.findBetsByUserId(req.user.id);
+    res.json({ account, bets });
+});
+
 app.post('/api/user/bets', authMiddleware, (req, res) => {
     if (req.user.role !== 'USER') return res.sendStatus(403);
     try { res.status(201).json(database.placeBulkBets(req.user.id, req.body.gameId, req.body.betGroups, 'USER')); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+// --- DEALER ROUTES ---
+app.get('/api/dealer/data', authMiddleware, (req, res) => {
+    if (req.user.role !== 'DEALER') return res.sendStatus(403);
+    const account = database.findAccountById(req.user.id, 'dealers');
+    const users = database.findUsersByDealerId(req.user.id);
+    const bets = database.findBetsByDealerId(req.user.id);
+    res.json({ account, users, bets });
+});
+
+app.post('/api/dealer/users', authMiddleware, (req, res) => {
+    if (req.user.role !== 'DEALER') return res.sendStatus(403);
+    try { res.status(201).json(database.createUser(req.body.user, req.user.id, req.body.initialDeposit)); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.put('/api/dealer/users/:id', authMiddleware, (req, res) => {
+    if (req.user.role !== 'DEALER') return res.sendStatus(403);
+    try { res.json(database.updateUser(req.body.user, req.params.id, req.user.id)); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.post('/api/dealer/wallet/topup', authMiddleware, (req, res) => {
+    if (req.user.role !== 'DEALER') return res.sendStatus(403);
+    try {
+        const { accountId, amount } = req.body;
+        database.runInTransaction(() => {
+            database.addLedgerEntry(req.user.id, 'DEALER', `Transfer to ${accountId}`, amount, 0);
+            database.addLedgerEntry(accountId, 'USER', `Deposit from Dealer`, 0, amount);
+        });
+        res.json({ success: true });
+    } catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.post('/api/dealer/wallet/withdraw', authMiddleware, (req, res) => {
+    if (req.user.role !== 'DEALER') return res.sendStatus(403);
+    try {
+        const { accountId, amount } = req.body;
+        database.runInTransaction(() => {
+            database.addLedgerEntry(accountId, 'USER', `Withdrawal by Dealer`, amount, 0);
+            database.addLedgerEntry(req.user.id, 'DEALER', `Withdrawal from ${accountId}`, 0, amount);
+        });
+        res.json({ success: true });
+    } catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.post('/api/dealer/restrict/user/:id', authMiddleware, (req, res) => {
+    if (req.user.role !== 'DEALER') return res.sendStatus(403);
+    try { res.json(database.toggleUserRestrictionByDealer(req.params.id, req.user.id)); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.post('/api/dealer/bets', authMiddleware, (req, res) => {
+    if (req.user.role !== 'DEALER') return res.sendStatus(403);
+    try { res.status(201).json(database.placeBulkBets(req.body.userId, req.body.gameId, req.body.betGroups, 'DEALER')); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+// --- ADMIN ROUTES ---
+app.get('/api/admin/data', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    const account = database.findAccountById(req.user.id, 'admins');
+    const dealers = database.getAllFromTable('dealers', true);
+    const users = database.getAllFromTable('users', true);
+    const bets = database.getAllFromTable('bets');
+    res.json({ account, dealers, users, bets });
+});
+
+app.get('/api/admin/summary', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    try { res.json(database.getFinancialSummary()); }
+    catch (e) { res.status(500).json({ message: 'Failed to fetch summary' }); }
+});
+
+app.post('/api/admin/games/winner', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    try { res.json(database.declareWinnerForGame(req.body.gameId, req.body.winningNumber)); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.post('/api/admin/games/approve', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    try { res.json(database.approvePayoutsForGame(req.body.gameId)); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.post('/api/admin/wallet/topup', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    try {
+        const { accountId, accountType, amount } = req.body;
+        database.runInTransaction(() => {
+            database.addLedgerEntry(req.user.id, 'ADMIN', `Transfer to ${accountId}`, amount, 0);
+            database.addLedgerEntry(accountId, accountType, `Deposit from Admin`, 0, amount);
+        });
+        res.json({ success: true });
+    } catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.post('/api/admin/wallet/withdraw', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    try {
+        const { accountId, accountType, amount } = req.body;
+        database.runInTransaction(() => {
+            database.addLedgerEntry(accountId, accountType, `Withdrawal by Admin`, amount, 0);
+            database.addLedgerEntry(req.user.id, 'ADMIN', `Withdrawal from ${accountId}`, 0, amount);
+        });
+        res.json({ success: true });
+    } catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.post('/api/admin/restrict/:type/:id', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    try { res.json(database.toggleAccountRestrictionByAdmin(req.params.id, req.params.type)); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.post('/api/admin/games/:id/time', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    try { res.json(database.updateGameDrawTime(req.params.id, req.body.drawTime)); }
     catch (e) { res.status(e.status || 400).json({ message: e.message }); }
 });
 
