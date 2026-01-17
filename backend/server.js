@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -114,14 +115,14 @@ app.get('*', (req, res) => {
         res.sendFile(INDEX_HTML);
     } else {
         res.status(500).send(`
-            <div style="background:#050101; color:#f43f5e; padding:40px; font-family:monospace; border:4px solid #f43f5e; border-radius: 24px; margin: 40px; box-shadow: 0 0 60px rgba(244,63,94,0.2);">
-                <h1 style="letter-spacing: -1px; margin-bottom: 20px;">[500] MAIN OVERRIDE FAILURE</h1>
-                <p style="color: #fda4af;">The system is running on Port <b>${PORT}</b> but cannot find the <b>dist/index.html</b> file.</p>
-                <div style="background: rgba(0,0,0,0.4); padding: 20px; border-radius: 12px; margin: 20px 0;">
-                    <p style="margin: 0;"><b>REQUIRED ACTION:</b></p>
-                    <code style="display: block; margin-top: 10px; color: #fff;">cd /var/www/html/aklasbela-tv && npm run build</code>
+            <div style="background:#020617; color:#f43f5e; padding:60px; font-family:sans-serif; border:1px solid #1e293b; border-radius: 40px; margin: 60px; box-shadow: 0 40px 100px rgba(0,0,0,0.8); text-align: center;">
+                <h1 style="letter-spacing: -2px; margin-bottom: 30px; font-size: 3rem; color: #fff;">PROTOCOL_FAILURE: NO_UI_BUILD</h1>
+                <p style="color: #64748b; font-size: 1.2rem; max-width: 600px; margin: 0 auto 40px;">The server is active on Port <b>${PORT}</b> but the frontend static files (dist/) are missing from the node directory.</p>
+                <div style="background: rgba(0,0,0,0.4); padding: 30px; border-radius: 20px; margin: 40px 0; border: 1px solid rgba(255,255,255,0.05);">
+                    <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; margin-bottom: 15px;"><b>REQUIRED INITIALIZATION COMMAND:</b></p>
+                    <code style="display: block; color: #6366f1; font-family: monospace; font-size: 1.2rem;">npm run build</code>
                 </div>
-                <p style="font-size: 11px; opacity: 0.5;">Target Path: ${INDEX_HTML}</p>
+                <p style="font-size: 12px; opacity: 0.4; color: #fff;">Expected Node: ${INDEX_HTML}</p>
             </div>
         `);
     }
@@ -137,10 +138,9 @@ try {
 
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log('--------------------------------------------------');
-    console.log(`🚀 AKLASBELA-TV EXCHANGE SYSTEM ACTIVATED`);
+    console.log(`🚀 AKLASBELA-TV REPLICA NODE ACTIVATED`);
     console.log(`📡 PORT: ${PORT}`);
     console.log(`🆔 PID:  ${process.pid}`);
-    console.log(`🌐 URL:  https://aklasbela-tv.com`);
     console.log(`📊 DB:   ${fs.existsSync(DB_FILE) ? 'OK' : 'MISSING'}`);
     console.log('--------------------------------------------------');
 });
