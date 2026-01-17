@@ -24,7 +24,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({ title, value, color, label })
   </div>
 );
 
-const AdminPanel: React.FC<AdminPanelProps> = ({ admin, dealers, games, declareWinner, approvePayouts, onRefreshData }) => {
+const AdminPanel: React.FC<AdminPanelProps> = ({ admin, dealers, games, declareWinner, updateWinner, approvePayouts, onRefreshData }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [winningNumbers, setWinningNumbers] = useState<{[key: string]: string}>({});
   const { fetchWithAuth } = useAuth();
@@ -43,8 +43,15 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ admin, dealers, games, declareW
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: Icons.chartBar },
     { id: 'dealers', label: 'Dealers', icon: Icons.userGroup }, 
-    { id: 'games', label: 'Markets', icon: Icons.gamepad },
+    { id: 'results', label: 'Winning Numbers', icon: Icons.clipboardList },
   ];
+
+  const validateWinningNumber = (game: Game, num: string) => {
+    if (game.name === 'AK' || game.name === 'AKC') {
+        return num.length === 1 && /^\d$/.test(num);
+    }
+    return num.length === 2 && /^\d{2}$/.test(num);
+  };
 
   return (
     <div className="px-4 sm:px-10 py-8 sm:py-16 max-w-7xl mx-auto min-h-screen">
@@ -99,7 +106,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ admin, dealers, games, declareW
                         <div className="flex items-center gap-4">
                            <div className="w-2 h-2 rounded-full bg-accent-indigo shadow-[0_0_8px_rgba(99,102,241,0.5)]"></div>
                            <span className="font-bold text-white uppercase tracking-widest text-sm">{game.gameName}</span>
-                           <span className="text-[10px] font-mono text-slate-600">ID: {game.winningNumber || '--'}</span>
+                           <span className="text-[10px] font-mono text-slate-600">RES: {game.winningNumber || '--'}</span>
                         </div>
                       </td>
                       <td className="p-6 text-right font-mono text-slate-400 text-sm">PKR {game.totalStake.toLocaleString()}</td>
@@ -116,58 +123,95 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ admin, dealers, games, declareW
         </div>
       )}
 
-      {activeTab === 'games' && (
-        <div className="animate-fade-in grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          {games.map(game => (
-            <div key={game.id} className="bg-slate-900/40 p-8 sm:p-10 rounded-[3rem] border border-white/5 shadow-2xl flex flex-col justify-between group hover:border-accent-indigo/30 transition-all">
-              <div className="flex justify-between items-start mb-10">
-                <div className="flex items-center gap-5">
-                   <img src={game.logo} className="w-14 h-14 sm:w-16 sm:h-16 rounded-full border border-white/10 p-1 bg-slate-950" alt="" />
-                   <div>
-                      <h4 className="text-xl font-bold text-white uppercase tracking-tighter">{game.name}</h4>
-                      <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-1">DRAW_TIME: {game.drawTime}</p>
-                   </div>
-                </div>
-                <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${game.isActive ? 'bg-accent-emerald/10 text-accent-emerald border-accent-emerald/20' : 'bg-slate-800 text-slate-500 border-white/5'}`}>
-                   {game.isActive ? 'Active' : 'Offline'}
-                </div>
-              </div>
+      {activeTab === 'results' && (
+        <div className="animate-fade-in grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {games.map(game => {
+              const currentInput = winningNumbers[game.id] || '';
+              const isValid = validateWinningNumber(game, currentInput);
+              const isDeclared = !!game.winningNumber;
+              const isApproved = !!game.payoutsApproved;
 
-              <div className="space-y-6">
-                 <div className="bg-black/40 p-6 rounded-2xl border border-white/5 shadow-inner">
-                    <p className="text-[9px] font-black text-slate-700 uppercase tracking-widest mb-3">Winning Payload</p>
-                    <div className="flex gap-4">
-                       <input 
-                         type="text" 
-                         placeholder="00" 
-                         value={winningNumbers[game.id] || ''} 
-                         onChange={e => setWinningNumbers(prev => ({...prev, [game.id]: e.target.value}))} 
-                         className="text-center font-mono font-black text-xl tracking-[0.2em]"
-                       />
+              return (
+                <div key={game.id} className="bg-slate-900/40 p-10 rounded-[3rem] border border-white/5 shadow-2xl flex flex-col justify-between group hover:border-accent-indigo/40 transition-all backdrop-blur-xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none group-hover:scale-125 transition-transform duration-700">
+                     <img src={game.logo} className="w-24 h-24 rounded-full grayscale" alt="" />
+                  </div>
+                  
+                  <div className="mb-10">
+                    <div className="flex items-center gap-5 mb-4">
+                       <img src={game.logo} className="w-14 h-14 rounded-full border-2 border-white/10 p-1 bg-slate-950 shadow-2xl" alt="" />
+                       <div>
+                          <h4 className="text-xl font-black text-white uppercase tracking-tighter">{game.name}</h4>
+                          <p className="text-[10px] font-black text-slate-600 uppercase tracking-widest mt-1">NODE_TIME: {game.drawTime}</p>
+                       </div>
+                    </div>
+                    <div className="flex gap-3">
+                        <div className={`px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border ${game.isActive ? 'bg-accent-emerald/10 text-accent-emerald border-accent-emerald/20' : 'bg-slate-800 text-slate-500 border-white/5'}`}>
+                        {game.isActive ? 'Active Node' : 'Offline'}
+                        </div>
+                        {isDeclared && (
+                            <div className="px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border bg-accent-indigo/10 text-accent-indigo border-accent-indigo/20">
+                                Result Live: {game.winningNumber}
+                            </div>
+                        )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-6 relative z-10">
+                     {!isApproved && (
+                         <div className="bg-black/60 p-8 rounded-3xl border border-white/5 shadow-inner">
+                            <p className="text-[9px] font-black text-slate-700 uppercase tracking-[0.4em] mb-4 text-center">Protocol Payload Entry</p>
+                            <div className="flex gap-4">
+                               <input 
+                                 type="text" 
+                                 placeholder={game.name === 'AK' || game.name === 'AKC' ? "0" : "00"} 
+                                 maxLength={game.name === 'AK' || game.name === 'AKC' ? 1 : 2}
+                                 value={currentInput} 
+                                 onChange={e => setWinningNumbers(prev => ({...prev, [game.id]: e.target.value}))} 
+                                 className="text-center font-mono font-black text-4xl py-6 tracking-[0.2em] bg-slate-950 border-white/10 focus:border-accent-indigo"
+                               />
+                               <button 
+                                 onClick={() => { 
+                                     if(isValid) {
+                                         if (isDeclared) updateWinner(game.id, currentInput);
+                                         else declareWinner(game.id, currentInput);
+                                         setWinningNumbers(prev => ({...prev, [game.id]: ''}));
+                                     }
+                                 }}
+                                 disabled={!isValid}
+                                 className={`px-8 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${isValid ? 'bg-accent-indigo text-white shadow-2xl hover:scale-105 active:scale-95' : 'bg-slate-900 text-slate-700 cursor-not-allowed'}`}
+                               >
+                                 {isDeclared ? 'Update' : 'Commit'}
+                               </button>
+                            </div>
+                            <p className="text-[8px] text-slate-800 font-bold mt-4 text-center uppercase tracking-widest">
+                                {game.name === 'AK' || game.name === 'AKC' ? "Single Digit Only" : "Double Digit Entry Required"}
+                            </p>
+                         </div>
+                     )}
+
+                     {isDeclared && !isApproved && (
                        <button 
-                         onClick={() => { if(winningNumbers[game.id]) declareWinner(game.id, winningNumbers[game.id]); }}
-                         className="bg-accent-indigo px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white hover:bg-indigo-500 transition-all"
+                         onClick={() => { if(confirm("Liquidate all bets for this market?")) approvePayouts(game.id); }}
+                         className="w-full h-16 bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] rounded-2xl hover:bg-slate-200 shadow-2xl transition-all"
                        >
-                         Push
+                         Authorize Liquidations
                        </button>
-                    </div>
-                 </div>
-                 {game.winningNumber && !game.payoutsApproved && (
-                   <button 
-                     onClick={() => approvePayouts(game.id)}
-                     className="w-full h-14 bg-white text-black font-black uppercase tracking-[0.3em] text-[10px] rounded-2xl hover:bg-slate-200 shadow-2xl transition-all"
-                   >
-                     Approve Liquidations
-                   </button>
-                 )}
-                 {game.winningNumber && game.payoutsApproved && (
-                    <div className="text-center py-4 bg-accent-emerald/10 border border-accent-emerald/20 rounded-2xl text-accent-emerald font-black text-[10px] uppercase tracking-widest">
-                       Audited & Paid
-                    </div>
-                 )}
-              </div>
-            </div>
-          ))}
+                     )}
+
+                     {isApproved && (
+                        <div className="flex flex-col items-center justify-center p-10 bg-accent-emerald/5 border-2 border-dashed border-accent-emerald/20 rounded-[2.5rem] text-center">
+                           <div className="text-accent-emerald text-3xl mb-4">
+                               {Icons.chartBar}
+                           </div>
+                           <p className="text-accent-emerald font-black text-[11px] uppercase tracking-[0.5em]">Audit Finalized</p>
+                           <p className="text-slate-600 text-[9px] font-bold mt-2 uppercase tracking-widest">Payouts successfully Pushed</p>
+                        </div>
+                     )}
+                  </div>
+                </div>
+              );
+          })}
         </div>
       )}
 

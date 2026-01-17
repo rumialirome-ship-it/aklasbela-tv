@@ -42,11 +42,11 @@ const GameNodeOrb: React.FC<{ game: Game }> = ({ game }) => {
     const logo = GAME_LOGOS[game.name] || '';
 
     return (
-        <div className="group relative circular-game-card p-6 sm:p-10 md:p-12">
-            {/* Draw Time Header Badge - Always Visible */}
-            <div className="absolute top-6 sm:top-10 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
-                <div className="bg-slate-950/80 border border-white/10 px-4 py-1.5 rounded-full shadow-2xl backdrop-blur-md">
-                    <p className="text-[10px] sm:text-[12px] font-black text-accent-indigo uppercase tracking-[0.2em] leading-none">
+        <div className="group relative circular-game-card p-8 sm:p-12 md:p-14 lg:p-16">
+            {/* Draw Time Header Badge - Always Visible and Prominent */}
+            <div className="absolute top-6 sm:top-8 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
+                <div className="bg-slate-950 border-2 border-white/10 px-6 py-2 rounded-full shadow-[0_0_30px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+                    <p className="text-[11px] sm:text-[14px] font-black text-accent-indigo uppercase tracking-[0.25em] leading-none">
                         {formatTime12h(game.drawTime)}
                     </p>
                 </div>
@@ -54,28 +54,28 @@ const GameNodeOrb: React.FC<{ game: Game }> = ({ game }) => {
 
             {/* Pulsing ring for active sessions */}
             {!hasResult && !isClosed && countdown.status === 'OPEN' && (
-                <div className="absolute inset-0 border-2 border-accent-indigo/40 rounded-full animate-pulse-glow"></div>
+                <div className="absolute inset-0 border-[3px] border-accent-indigo/40 rounded-full animate-pulse-glow"></div>
             )}
             
-            <div className="relative mb-4 sm:mb-6 md:mb-8 w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 z-10 shrink-0 mt-8">
-                <div className="absolute inset-0 bg-accent-indigo/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                <img src={logo} alt={game.name} className="relative w-full h-full rounded-full border border-white/10 p-1.5 bg-slate-900 group-hover:scale-110 transition-transform duration-700 shadow-2xl" />
+            <div className="relative mb-6 sm:mb-8 md:mb-10 w-24 h-24 sm:w-36 sm:h-36 md:w-44 md:h-44 z-10 shrink-0 mt-10">
+                <div className="absolute inset-0 bg-accent-indigo/30 blur-[60px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                <img src={logo} alt={game.name} className="relative w-full h-full rounded-full border-2 border-white/10 p-2 bg-slate-900 group-hover:scale-110 transition-transform duration-700 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8)]" />
             </div>
 
-            <div className="text-center relative z-10 w-full px-2">
-                <h3 className="text-xs sm:text-sm md:text-xl font-bold text-white mb-1 md:mb-2 uppercase tracking-tight group-hover:text-accent-indigo transition-colors duration-500">{game.name}</h3>
+            <div className="text-center relative z-10 w-full px-4">
+                <h3 className="text-sm sm:text-lg md:text-2xl font-black text-white mb-2 md:mb-3 uppercase tracking-tighter group-hover:text-accent-indigo transition-colors duration-500 line-clamp-1">{game.name}</h3>
                 
                 {hasResult ? (
                     <div className="mt-1">
-                        <span className="text-[8px] md:text-[9px] uppercase tracking-[0.4em] text-accent-emerald font-black">WINNER</span>
-                        <div className="text-xl sm:text-3xl md:text-5xl font-mono font-black text-white leading-none tracking-tighter">{game.winningNumber}</div>
+                        <span className="text-[9px] md:text-[11px] uppercase tracking-[0.5em] text-accent-emerald font-black">WINNER_PUSHED</span>
+                        <div className="text-2xl sm:text-5xl md:text-7xl font-mono font-black text-white leading-none tracking-tighter mt-1">{game.winningNumber}</div>
                     </div>
                 ) : isClosed ? (
-                    <div className="mt-3 py-1.5 px-4 bg-white/5 rounded-xl text-[9px] font-bold text-slate-500 uppercase tracking-widest border border-white/5">Market Closed</div>
+                    <div className="mt-4 py-2 px-6 bg-white/5 rounded-2xl text-[10px] font-black text-slate-500 uppercase tracking-widest border border-white/5">Market Offline</div>
                 ) : (
                     <div className="mt-1">
-                        <p className="text-[8px] sm:text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] mb-1">Closing In</p>
-                        <div className={`text-base sm:text-2xl md:text-4xl font-mono font-black tracking-tighter leading-none ${countdown.status === 'OPEN' ? 'text-white' : 'text-slate-600'}`}>
+                        <p className="text-[9px] sm:text-[11px] text-slate-600 font-bold uppercase tracking-[0.4em] mb-2">Cycle Ends In</p>
+                        <div className={`text-xl sm:text-3xl md:text-5xl font-mono font-black tracking-tighter leading-none ${countdown.status === 'OPEN' ? 'text-white' : 'text-slate-600'}`}>
                             {countdown.text}
                         </div>
                     </div>
@@ -110,10 +110,10 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
         <div className="min-h-screen bg-obsidian flex flex-col selection:bg-accent-indigo/30">
             <ResultsTicker games={games} />
             
-            <div className="max-w-7xl mx-auto px-8 sm:px-12 py-16 sm:py-32 w-full flex-grow relative overflow-hidden">
+            <div className="max-w-7xl mx-auto px-6 sm:px-12 py-16 sm:py-32 w-full flex-grow relative overflow-hidden">
                 {/* Tactical Depth Glows */}
-                <div className="absolute top-20 left-1/4 w-[800px] h-[800px] bg-indigo-600/[0.03] blur-[150px] rounded-full"></div>
-                <div className="absolute bottom-20 right-1/4 w-[600px] h-[600px] bg-cyan-600/[0.03] blur-[150px] rounded-full"></div>
+                <div className="absolute top-20 left-1/4 w-[800px] h-[800px] bg-indigo-600/[0.04] blur-[150px] rounded-full"></div>
+                <div className="absolute bottom-20 right-1/4 w-[600px] h-[600px] bg-cyan-600/[0.04] blur-[150px] rounded-full"></div>
 
                 <header className="text-center mb-24 sm:mb-40 relative z-10 animate-fade-in">
                     <div className="inline-block px-8 py-3 rounded-full bg-slate-900 border border-white/5 text-[11px] font-black text-accent-indigo uppercase tracking-[0.6em] mb-12 shadow-2xl">
@@ -125,7 +125,7 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
                     <p className="text-slate-500 font-bold tracking-[1.5em] sm:tracking-[2em] uppercase text-[10px] sm:text-base opacity-40">Decentralized Asset Node</p>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-32 items-start relative z-10">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start relative z-10">
                     {/* Security Login Card */}
                     <div className="lg:col-span-4 order-2 lg:order-1">
                         <div className="card border-white/5 relative overflow-hidden group">
@@ -164,17 +164,17 @@ const LandingPage: React.FC<{ games: Game[] }> = ({ games }) => {
                         </div>
                     </div>
 
-                    {/* Market Nodes Feed */}
+                    {/* Market Nodes Feed - Bigger Layout */}
                     <div className="lg:col-span-8 order-1 lg:order-2">
                         <div className="flex items-center gap-10 mb-16 sm:mb-24">
-                            <h2 className="text-sm sm:text-base font-black uppercase tracking-[1em] text-white whitespace-nowrap">Live Market</h2>
+                            <h2 className="text-sm sm:text-base font-black uppercase tracking-[1em] text-white whitespace-nowrap">Live Market Nodes</h2>
                             <div className="h-px flex-grow bg-white/5"></div>
                             <div className="flex items-center gap-4">
                                 <span className="w-3 h-3 bg-accent-emerald rounded-full animate-pulse shadow-[0_0_15px_rgba(16,185,129,0.5)]"></span>
-                                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.4em]">ONLINE</span>
+                                <span className="text-[11px] font-bold text-slate-500 uppercase tracking-[0.4em]">SYNC_OK</span>
                             </div>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-8 sm:gap-16">
+                        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-2 xl:grid-cols-3 gap-12 sm:gap-16">
                             {games.map(game => (
                                 <GameNodeOrb key={game.id} game={game} />
                             ))}

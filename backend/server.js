@@ -134,6 +134,12 @@ app.put('/api/dealer/users/:id', authMiddleware, (req, res) => {
     catch (e) { res.status(e.status || 400).json({ message: e.message }); }
 });
 
+app.put('/api/dealer/profile', authMiddleware, (req, res) => {
+    if (req.user.role !== 'DEALER') return res.sendStatus(403);
+    try { res.json(database.updateDealerProfile(req.user.id, req.body.dealer)); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
 app.post('/api/dealer/wallet/topup', authMiddleware, (req, res) => {
     if (req.user.role !== 'DEALER') return res.sendStatus(403);
     try {
@@ -189,6 +195,12 @@ app.get('/api/admin/summary', authMiddleware, (req, res) => {
 app.post('/api/admin/games/winner', authMiddleware, (req, res) => {
     if (req.user.role !== 'ADMIN') return res.sendStatus(403);
     try { res.json(database.declareWinnerForGame(req.body.gameId, req.body.winningNumber)); }
+    catch (e) { res.status(e.status || 400).json({ message: e.message }); }
+});
+
+app.put('/api/admin/games/winner', authMiddleware, (req, res) => {
+    if (req.user.role !== 'ADMIN') return res.sendStatus(403);
+    try { res.json(database.updateWinningNumber(req.body.gameId, req.body.winningNumber)); }
     catch (e) { res.status(e.status || 400).json({ message: e.message }); }
 });
 

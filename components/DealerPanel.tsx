@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Dealer, User, LedgerEntry, Bet, Game, SubGameType } from '../types';
 import { Icons } from '../constants';
 
@@ -19,7 +19,7 @@ const Modal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; chi
     );
 };
 
-const DealerPanel: React.FC<DealerPanelProps> = ({ dealer, users, onSaveUser, topUpUserWallet, withdrawFromUserWallet, toggleAccountRestriction, games, placeBetAsDealer }) => {
+const DealerPanel: React.FC<DealerPanelProps> = ({ dealer, users, onSaveUser, topUpUserWallet, withdrawFromUserWallet, toggleAccountRestriction, games, placeBetAsDealer, onUpdateProfile }) => {
   const [activeTab, setActiveTab] = useState('users');
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | undefined>(undefined);
@@ -29,6 +29,7 @@ const DealerPanel: React.FC<DealerPanelProps> = ({ dealer, users, onSaveUser, to
     { id: 'users', label: 'Network', icon: Icons.userGroup },
     { id: 'terminal', label: 'Terminal', icon: Icons.clipboardList },
     { id: 'wallet', label: 'Vault', icon: Icons.wallet },
+    { id: 'settings', label: 'Nodes', icon: Icons.plus },
   ];
 
   const filteredUsers = useMemo(() => {
@@ -82,18 +83,36 @@ const DealerPanel: React.FC<DealerPanelProps> = ({ dealer, users, onSaveUser, to
                           </div>
                           <button onClick={() => toggleAccountRestriction(user.id, 'user')} className={`w-2.5 h-2.5 rounded-full transition-all ${user.isRestricted ? 'bg-accent-rose shadow-[0_0_12px_rgba(244,63,94,0.6)]' : 'bg-accent-emerald shadow-[0_0_10px_rgba(16,185,129,0.4)] opacity-30 group-hover:opacity-100'}`}></button>
                       </div>
-                      <div className="bg-black/30 p-6 sm:p-8 rounded-2xl mb-8 sm:mb-10 border border-white/5 shadow-inner">
-                          <p className="text-[9px] sm:text-[10px] font-black text-slate-700 uppercase tracking-[0.4em] mb-2">Vault Balance</p>
+                      
+                      {/* Quick Cash Interface */}
+                      <div className="bg-black/30 p-6 sm:p-8 rounded-[2rem] mb-8 sm:mb-10 border border-white/5 shadow-inner">
+                          <div className="flex justify-between items-center mb-4">
+                            <p className="text-[9px] sm:text-[10px] font-black text-slate-700 uppercase tracking-[0.4em]">Live Vault Status</p>
+                            <span className="text-[8px] font-mono text-slate-800 uppercase">Secure_Sync_OK</span>
+                          </div>
                           <div className="flex items-center justify-between gap-4">
-                            <p className="text-2xl sm:text-3xl font-black font-mono text-white tracking-tighter truncate">PKR {user.wallet.toLocaleString()}</p>
-                            <div className="flex gap-2">
-                                <button onClick={() => { const a = prompt('Topup?'); if(a) topUpUserWallet(user.id, parseFloat(a)); }} className="text-accent-emerald bg-accent-emerald/10 w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs hover:bg-accent-emerald/20 transition-colors">+</button>
-                                <button onClick={() => { const a = prompt('Withdraw?'); if(a) withdrawFromUserWallet(user.id, parseFloat(a)); }} className="text-accent-rose bg-accent-rose/10 w-8 h-8 rounded-lg flex items-center justify-center font-black text-xs hover:bg-accent-rose/20 transition-colors">-</button>
+                            <p className="text-2xl sm:text-4xl font-black font-mono text-white tracking-tighter truncate">PKR {user.wallet.toLocaleString()}</p>
+                            <div className="flex gap-3">
+                                <button 
+                                    onClick={() => { const a = prompt(`Topup ${user.name}'s balance?`); if(a) topUpUserWallet(user.id, parseFloat(a)); }} 
+                                    className="bg-accent-emerald text-white h-12 px-5 rounded-xl flex items-center justify-center font-black text-xs hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/10"
+                                    title="Quick Topup"
+                                >
+                                    {Icons.plus}
+                                </button>
+                                <button 
+                                    onClick={() => { const a = prompt(`Withdraw from ${user.name}'s balance? (Balance: PKR ${user.wallet})`); if(a) withdrawFromUserWallet(user.id, parseFloat(a)); }} 
+                                    className="bg-accent-rose text-white h-12 px-5 rounded-xl flex items-center justify-center font-black text-xs hover:bg-rose-500 transition-all shadow-lg shadow-rose-500/10"
+                                    title="Quick Withdraw"
+                                >
+                                    -
+                                </button>
                             </div>
                           </div>
                       </div>
+                      
                       <div className="flex justify-between items-center pt-2">
-                          <button onClick={() => { setSelectedUser(user); setIsUserModalOpen(true); }} className="text-[9px] sm:text-[10px] font-black text-slate-600 hover:text-white uppercase tracking-[0.3em] transition-colors">Configure</button>
+                          <button onClick={() => { setSelectedUser(user); setIsUserModalOpen(true); }} className="text-[9px] sm:text-[10px] font-black text-slate-600 hover:text-white uppercase tracking-[0.3em] transition-colors">Configure Agent</button>
                           <span className="text-[9px] font-black text-slate-800 uppercase tracking-[0.4em]">Audit_Locked</span>
                       </div>
                   </div>
@@ -129,11 +148,79 @@ const DealerPanel: React.FC<DealerPanelProps> = ({ dealer, users, onSaveUser, to
         </div>
       )}
 
+      {activeTab === 'settings' && (
+        <div className="animate-fade-in">
+            <DealerProfileForm dealer={dealer} onUpdate={onUpdateProfile} />
+        </div>
+      )}
+
       <Modal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} title={selectedUser ? "Modify Agent Config" : "Deploy New Agent"} size="lg">
           <AgentForm user={selectedUser} onCancel={() => setIsUserModalOpen(false)} onSave={(u, dep) => { onSaveUser(u, selectedUser?.id, dep); setIsUserModalOpen(false); }} />
       </Modal>
     </div>
   );
+};
+
+const DealerProfileForm: React.FC<{ dealer: Dealer; onUpdate: (d: any) => Promise<void> }> = ({ dealer, onUpdate }) => {
+    const [formData, setFormData] = useState({
+        name: dealer.name,
+        password: dealer.password,
+        prizeRates: { ...dealer.prizeRates }
+    });
+    const [status, setStatus] = useState('');
+
+    const handleSubmit = async () => {
+        try {
+            await onUpdate(formData);
+            setStatus('PROFILE_UPDATED_SUCCESSFULLY');
+            setTimeout(() => setStatus(''), 3000);
+        } catch (e) {
+            setStatus('UPDATE_FAILED');
+        }
+    };
+
+    return (
+        <div className="max-w-4xl mx-auto space-y-12">
+            <div className="bg-slate-900/40 p-10 sm:p-16 rounded-[3rem] border border-white/5 shadow-2xl">
+                <h3 className="text-2xl font-black text-white uppercase tracking-[0.4em] mb-12">Node Authentication</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 mb-12">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">Node Alias</label>
+                        <input value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">Access Key (Password)</label>
+                        <input type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} />
+                    </div>
+                </div>
+
+                <h3 className="text-2xl font-black text-white uppercase tracking-[0.4em] mb-12 pt-8 border-t border-white/5">Prize Protocol</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 mb-12">
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">1D Open Rate</label>
+                        <input type="number" value={formData.prizeRates.oneDigitOpen} onChange={e => setFormData({ ...formData, prizeRates: { ...formData.prizeRates, oneDigitOpen: parseInt(e.target.value) || 0 } })} />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">1D Close Rate</label>
+                        <input type="number" value={formData.prizeRates.oneDigitClose} onChange={e => setFormData({ ...formData, prizeRates: { ...formData.prizeRates, oneDigitClose: parseInt(e.target.value) || 0 } })} />
+                    </div>
+                    <div className="space-y-3">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-2">2D Rate</label>
+                        <input type="number" value={formData.prizeRates.twoDigit} onChange={e => setFormData({ ...formData, prizeRates: { ...formData.prizeRates, twoDigit: parseInt(e.target.value) || 0 } })} />
+                    </div>
+                </div>
+
+                <div className="bg-slate-950/60 p-8 rounded-2xl mb-12 border border-white/5 text-center">
+                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.5em]">Network Commission: {dealer.commissionRate}%</p>
+                    <p className="text-[8px] text-slate-800 font-bold mt-2 uppercase">Commission changes require root admin authorization</p>
+                </div>
+
+                {status && <p className="text-center text-accent-indigo font-black text-[10px] uppercase tracking-widest mb-10 animate-pulse">{status}</p>}
+
+                <button onClick={handleSubmit} className="btn-primary w-full h-16 sm:h-20 text-sm">Commit Protocol Update</button>
+            </div>
+        </div>
+    );
 };
 
 const AgentForm: React.FC<{ user?: User; onCancel: () => void; onSave: (u: any, dep: number) => void }> = ({ user, onCancel, onSave }) => {
@@ -294,6 +381,7 @@ interface DealerPanelProps {
   bets: Bet[];
   games: Game[];
   placeBetAsDealer: (details: { userId: string; gameId: string; betGroups: any[] }) => Promise<void>;
+  onUpdateProfile: (d: any) => Promise<void>;
   isLoaded?: boolean;
 }
 

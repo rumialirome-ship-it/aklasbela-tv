@@ -115,6 +115,14 @@ const AppContent: React.FC = () => {
         fetchPrivateData();
     };
 
+    const handleUpdateDealerProfile = async (d: any) => {
+        await fetchWithAuth('/api/dealer/profile', {
+            method: 'PUT',
+            body: JSON.stringify({ dealer: d })
+        });
+        fetchPrivateData();
+    };
+
     const handleDeleteUser = async (uId: string) => {
         if (!confirm('Permanent deletion of agent record?')) return;
         await fetchWithAuth(`/api/dealer/users/${uId}`, { method: 'DELETE' });
@@ -146,6 +154,15 @@ const AppContent: React.FC = () => {
     const handleDeclareWinner = async (gameId: string, num: string) => {
         await fetchWithAuth('/api/admin/games/winner', {
             method: 'POST',
+            body: JSON.stringify({ gameId, winningNumber: num })
+        });
+        fetchPublicData();
+        fetchPrivateData();
+    };
+
+    const handleUpdateWinner = async (gameId: string, num: string) => {
+        await fetchWithAuth('/api/admin/games/winner', {
+            method: 'PUT',
             body: JSON.stringify({ gameId, winningNumber: num })
         });
         fetchPublicData();
@@ -199,7 +216,8 @@ const AppContent: React.FC = () => {
                                 toggleAccountRestriction={(id) => handleToggleRestriction(id, 'user')} 
                                 bets={bets} 
                                 games={games.filter(g => g.isActive)} 
-                                placeBetAsDealer={handleDealerTerminalBet} 
+                                placeBetAsDealer={handleDealerTerminalBet}
+                                onUpdateProfile={handleUpdateDealerProfile}
                             />
                         )}
                         {role === Role.Admin && (
@@ -216,7 +234,7 @@ const AppContent: React.FC = () => {
                                 games={games} 
                                 bets={bets} 
                                 declareWinner={handleDeclareWinner} 
-                                updateWinner={handleDeclareWinner} 
+                                updateWinner={handleUpdateWinner} 
                                 approvePayouts={handleApprovePayouts} 
                                 topUpDealerWallet={(id, a) => handleWalletUpdate('DEALER', id, a, 'TOPUP')} 
                                 withdrawFromDealerWallet={(id, a) => handleWalletUpdate('DEALER', id, a, 'WITHDRAW')} 
