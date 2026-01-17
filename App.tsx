@@ -104,6 +104,63 @@ const AppContent: React.FC = () => {
         lastGamesRef.current = games;
     }, [games]);
 
+    // --- HANDLERS ---
+    const handleSaveUser = async (u: User, originalId?: string, initialDeposit?: number) => {
+        const method = originalId ? 'PUT' : 'POST';
+        const url = originalId ? `/api/dealer/users/${originalId}` : '/api/dealer/users';
+        await fetchWithAuth(url, { 
+            method, 
+            body: JSON.stringify({ user: u, initialDeposit }) 
+        });
+        fetchPrivateData();
+    };
+
+    const handleDeleteUser = async (uId: string) => {
+        if (!confirm('Permanent deletion of agent record?')) return;
+        await fetchWithAuth(`/api/dealer/users/${uId}`, { method: 'DELETE' });
+        fetchPrivateData();
+    };
+
+    const handleWalletUpdate = async (type: 'USER' | 'DEALER', id: string, amount: number, action: 'TOPUP' | 'WITHDRAW') => {
+        const endpoint = `/api/${role.toLowerCase()}/wallet/${action.toLowerCase()}`;
+        await fetchWithAuth(endpoint, {
+            method: 'POST',
+            body: JSON.stringify({ accountId: id, accountType: type, amount })
+        });
+        fetchPrivateData();
+    };
+
+    const handleToggleRestriction = async (id: string, type: 'user' | 'dealer') => {
+        await fetchWithAuth(`/api/${role.toLowerCase()}/restrict/${type}/${id}`, { method: 'POST' });
+        fetchPrivateData();
+    };
+
+    const handleDealerTerminalBet = async (details: any) => {
+        await fetchWithAuth('/api/dealer/bets', {
+            method: 'POST',
+            body: JSON.stringify(details)
+        });
+        fetchPrivateData();
+    };
+
+    const handleDeclareWinner = async (gameId: string, num: string) => {
+        await fetchWithAuth('/api/admin/games/winner', {
+            method: 'POST',
+            body: JSON.stringify({ gameId, winningNumber: num })
+        });
+        fetchPublicData();
+        fetchPrivateData();
+    };
+
+    const handleApprovePayouts = async (gameId: string) => {
+        await fetchWithAuth('/api/admin/games/approve', {
+            method: 'POST',
+            body: JSON.stringify({ gameId })
+        });
+        fetchPublicData();
+        fetchPrivateData();
+    };
+
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-obsidian overflow-hidden relative">
             <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
@@ -123,9 +180,55 @@ const AppContent: React.FC = () => {
                 <div className="flex flex-col min-h-screen relative z-10">
                     <Header />
                     <main className="flex-grow">
-                        {role === Role.User && <UserPanel user={account as User} games={games.filter(g => g.isActive)} bets={bets} placeBet={async d => { await fetchWithAuth('/api/user/bets', { method: 'POST', body: JSON.stringify(d) }); fetchPrivateData(); }} />}
-                        {role === Role.Dealer && <DealerPanel dealer={account as Dealer} users={users} onSaveUser={async (u,o,i) => {}} onDeleteUser={async u => {}} topUpUserWallet={async (id,a) => {}} withdrawFromUserWallet={async (id,a) => {}} toggleAccountRestriction={u => {}} bets={bets} games={games} placeBetAsDealer={async d => {}} />}
-                        {role === Role.Admin && <AdminPanel admin={account as Admin} dealers={dealers} onSaveDealer={async d => {}} users={users} setUsers={setUsers} games={games} bets={bets} declareWinner={async (i,n) => {}} updateWinner={async (i,n) => {}} approvePayouts={async i => {}} topUpDealerWallet={async (i,a) => {}} withdrawFromDealerWallet={async (i,a) => {}} toggleAccountRestriction={async (i,t) => {}} onPlaceAdminBets={async d => {}} updateGameDrawTime={async (i,t) => {}} onRefreshData={fetchPrivateData} />}
+                        {role === Role.User && (
+                            <UserPanel 
+                                user={account as User} 
+                                games={games.filter(g => g.isActive)} 
+                                bets={bets} 
+                                placeBet={async d => { await fetchWithAuth('/api/user/bets', { method: 'POST', body: JSON.stringify(d) }); fetchPrivateData(); }} 
+                            />
+                        )}
+                        {role === Role.Dealer && (
+                            <DealerPanel 
+                                dealer={account as Dealer} 
+                                users={users} 
+                                onSaveUser={handleSaveUser} 
+                                onDeleteUser={handleDeleteUser} 
+                                topUpUserWallet={(id, a) => handleWalletUpdate('USER', id, a, 'TOPUP')} 
+                                withdrawFromUserWallet={(id, a) => handleWalletUpdate('USER', id, a, 'WITHDRAW')} 
+                                toggleAccountRestriction={(id) => handleToggleRestriction(id, 'user')} 
+                                bets={bets} 
+                                games={games.filter(g => g.isActive)} 
+                                placeBetAsDealer={handleDealerTerminalBet} 
+                            />
+                        )}
+                        {role === Role.Admin && (
+                            <AdminPanel 
+                                admin={account as Admin} 
+                                dealers={dealers} 
+                                onSaveDealer={async (d, o) => { 
+                                    const method = o ? 'PUT' : 'POST';
+                                    await fetchWithAuth(`/api/admin/dealers${o ? `/${o}` : ''}`, { method, body: JSON.stringify(d) });
+                                    fetchPrivateData();
+                                }} 
+                                users={users} 
+                                setUsers={setUsers} 
+                                games={games} 
+                                bets={bets} 
+                                declareWinner={handleDeclareWinner} 
+                                updateWinner={handleDeclareWinner} 
+                                approvePayouts={handleApprovePayouts} 
+                                topUpDealerWallet={(id, a) => handleWalletUpdate('DEALER', id, a, 'TOPUP')} 
+                                withdrawFromDealerWallet={(id, a) => handleWalletUpdate('DEALER', id, a, 'WITHDRAW')} 
+                                toggleAccountRestriction={handleToggleRestriction} 
+                                onPlaceAdminBets={async d => {}} 
+                                updateGameDrawTime={async (id, time) => {
+                                    await fetchWithAuth(`/api/admin/games/${id}/time`, { method: 'POST', body: JSON.stringify({ drawTime: time }) });
+                                    fetchPublicData();
+                                }} 
+                                onRefreshData={fetchPrivateData} 
+                            />
+                        )}
                     </main>
                 </div>
             )}

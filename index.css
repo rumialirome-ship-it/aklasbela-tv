@@ -51,19 +51,19 @@ body {
 
 /* High-Impact Inputs */
 input, select, textarea {
-  @apply bg-slate-900/80 border border-slate-800 rounded-2xl px-6 py-5 text-sm transition-all focus:border-accent-indigo focus:ring-8 focus:ring-accent-indigo/10 focus:outline-none text-slate-100 placeholder:text-slate-600 shadow-inner font-medium w-full;
+  @apply bg-slate-950/80 border border-slate-800/50 rounded-2xl px-5 py-4 text-sm transition-all focus:border-accent-indigo focus:ring-4 focus:ring-accent-indigo/10 focus:outline-none text-slate-100 placeholder:text-slate-700 shadow-inner font-medium w-full;
 }
 
 /* Tactical Buttons */
 .btn-primary {
-  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-bold py-5 px-12 rounded-full transition-all shadow-2xl shadow-indigo-500/20 active:scale-95 disabled:opacity-50 relative overflow-hidden uppercase tracking-[0.2em] text-xs sm:text-sm;
+  @apply bg-accent-indigo hover:bg-indigo-500 text-white font-bold py-4 px-10 rounded-full transition-all shadow-2xl shadow-indigo-500/20 active:scale-95 disabled:opacity-30 relative overflow-hidden uppercase tracking-[0.2em] text-[10px] sm:text-xs;
 }
 
 .btn-primary::before {
   content: '';
-  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent;
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent;
   transform: translateX(-100%);
-  animation: shimmer 2s infinite;
+  animation: shimmer 3s infinite;
 }
 
 @keyframes shimmer {
@@ -72,17 +72,32 @@ input, select, textarea {
 }
 
 .card {
-  @apply glass rounded-[3rem] p-10 sm:p-16;
+  @apply glass rounded-[2.5rem] p-8 sm:p-12 md:p-16;
 }
 
 /* Utility: Custom Scrollbars */
-::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { @apply bg-slate-800/50 rounded-full hover:bg-slate-700 transition-colors; }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+.custom-scrollbar::-webkit-scrollbar { display: block; }
+
 .winning-ball-reveal {
   @apply w-40 h-40 sm:w-64 sm:h-64 rounded-full flex items-center justify-center bg-white text-black font-black text-6xl sm:text-9xl shadow-[0_0_80px_rgba(255,255,255,0.4)] border-8 border-accent-indigo;
 }
+
+/* Animations */
+@keyframes mesh-flow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+.animate-shake { animation: shake 0.4s ease-in-out infinite; }
