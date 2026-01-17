@@ -43,12 +43,21 @@ const GameNodeOrb: React.FC<{ game: Game }> = ({ game }) => {
 
     return (
         <div className="group relative circular-game-card p-6 sm:p-10 md:p-12">
+            {/* Draw Time Header Badge - Always Visible */}
+            <div className="absolute top-6 sm:top-10 left-1/2 -translate-x-1/2 z-20 whitespace-nowrap">
+                <div className="bg-slate-950/80 border border-white/10 px-4 py-1.5 rounded-full shadow-2xl backdrop-blur-md">
+                    <p className="text-[10px] sm:text-[12px] font-black text-accent-indigo uppercase tracking-[0.2em] leading-none">
+                        {formatTime12h(game.drawTime)}
+                    </p>
+                </div>
+            </div>
+
             {/* Pulsing ring for active sessions */}
             {!hasResult && !isClosed && countdown.status === 'OPEN' && (
                 <div className="absolute inset-0 border-2 border-accent-indigo/40 rounded-full animate-pulse-glow"></div>
             )}
             
-            <div className="relative mb-4 sm:mb-6 md:mb-8 w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 z-10 shrink-0">
+            <div className="relative mb-4 sm:mb-6 md:mb-8 w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 z-10 shrink-0 mt-8">
                 <div className="absolute inset-0 bg-accent-indigo/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
                 <img src={logo} alt={game.name} className="relative w-full h-full rounded-full border border-white/10 p-1.5 bg-slate-900 group-hover:scale-110 transition-transform duration-700 shadow-2xl" />
             </div>
@@ -62,14 +71,12 @@ const GameNodeOrb: React.FC<{ game: Game }> = ({ game }) => {
                         <div className="text-xl sm:text-3xl md:text-5xl font-mono font-black text-white leading-none tracking-tighter">{game.winningNumber}</div>
                     </div>
                 ) : isClosed ? (
-                    <div className="mt-3 py-1.5 px-4 bg-white/5 rounded-xl text-[9px] font-bold text-slate-500 uppercase tracking-widest border border-white/5">Closed</div>
+                    <div className="mt-3 py-1.5 px-4 bg-white/5 rounded-xl text-[9px] font-bold text-slate-500 uppercase tracking-widest border border-white/5">Market Closed</div>
                 ) : (
                     <div className="mt-1">
-                        <div className={`text-base sm:text-2xl md:text-4xl font-mono font-black tracking-tighter leading-none ${countdown.status === 'OPEN' ? 'text-accent-indigo' : 'text-slate-600'}`}>
+                        <p className="text-[8px] sm:text-[10px] text-slate-500 font-bold uppercase tracking-[0.3em] mb-1">Closing In</p>
+                        <div className={`text-base sm:text-2xl md:text-4xl font-mono font-black tracking-tighter leading-none ${countdown.status === 'OPEN' ? 'text-white' : 'text-slate-600'}`}>
                             {countdown.text}
-                        </div>
-                        <div className="text-[10px] sm:text-[12px] md:text-[14px] uppercase tracking-[0.3em] text-white font-black mt-2 opacity-90">
-                           {formatTime12h(game.drawTime)}
                         </div>
                     </div>
                 )}

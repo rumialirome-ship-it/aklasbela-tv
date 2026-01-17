@@ -23,7 +23,16 @@ const GameOrbCard: React.FC<{ game: Game; onPlay: (game: Game) => void; isRestri
             disabled={!isPlayable}
             className={`group circular-game-card w-full p-4 sm:p-6 md:p-8 ${!isPlayable ? 'opacity-30 grayscale cursor-not-allowed scale-95' : 'hover:scale-105 active:scale-95 transition-all duration-700'}`}
         >
-            <div className="relative mb-3 sm:mb-5 w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28">
+            {/* Draw Time Header Badge */}
+            <div className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 z-20">
+                <div className="bg-slate-950/90 border border-white/20 px-3 py-1 rounded-full shadow-2xl">
+                    <p className="text-[9px] sm:text-[11px] font-black text-accent-indigo uppercase tracking-tight leading-none whitespace-nowrap">
+                        {formatTime12h(game.drawTime)}
+                    </p>
+                </div>
+            </div>
+
+            <div className="relative mb-3 sm:mb-5 w-14 h-14 sm:w-20 sm:h-20 md:w-28 md:h-28 mt-4 sm:mt-6">
                 <div className={`absolute -inset-3 sm:-inset-5 rounded-full blur-2xl transition-all duration-1000 ${isPlayable ? 'bg-accent-indigo/20 group-hover:bg-accent-indigo/40' : 'bg-transparent'}`}></div>
                 <img src={game.logo} alt={game.name} className="relative w-full h-full rounded-full border border-white/10 p-1 bg-slate-900 group-hover:rotate-6 transition-transform duration-700 shadow-xl" />
             </div>
@@ -38,12 +47,9 @@ const GameOrbCard: React.FC<{ game: Game; onPlay: (game: Game) => void; isRestri
                     </div>
                 ) : (
                     <div className="mt-1">
-                        <div className={`text-sm sm:text-xl md:text-3xl font-mono font-black leading-tight tracking-tighter ${isPlayable ? 'text-accent-indigo' : 'text-slate-600'}`}>
+                        <div className={`text-sm sm:text-xl md:text-3xl font-mono font-black leading-tight tracking-tighter ${isPlayable ? 'text-white' : 'text-slate-600'}`}>
                             {countdown.text}
                         </div>
-                        <p className="text-[9px] sm:text-[11px] md:text-[13px] text-white font-black uppercase tracking-[0.2em] mt-1.5 opacity-100">
-                            {formatTime12h(game.drawTime)}
-                        </p>
                     </div>
                 )}
             </div>
