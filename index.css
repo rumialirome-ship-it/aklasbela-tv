@@ -1,0 +1,368 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- CINEMATIC MECHANICAL DRAW ENGINE (ULTRA-REALISTIC GLASS) --- */
+
+.lottery-machine-viewport {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #000;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10000;
+}
+
+/* THE SPHERICAL CHAMBER */
+.machine-jar {
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 82%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 15;
+}
+
+.machine-jar::after {
+    content: '';
+    position: absolute;
+    top: 48px; /* Offset to align perfectly with the sphere below the mechanical neck */
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 49; /* Sitting on top of mixing balls for dynamic refraction layer */
+    background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.08) 35%, rgba(0, 0, 0, 0.5) 75%, rgba(0, 0, 0, 0.92) 100%);
+    box-shadow: 
+        inset 0 0 60px rgba(255, 255, 255, 0.24),
+        inset -25px -25px 50px rgba(0, 0, 0, 0.95),
+        inset 25px 25px 50px rgba(255, 255, 255, 0.28),
+        0 30px 60px rgba(0, 0, 0, 0.75);
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    backdrop-filter: blur(1.5px) contrast(1.2) saturate(1.15);
+    opacity: 0.88;
+}
+
+.jar-neck-mechanical {
+    width: 110px;
+    height: 50px;
+    background: linear-gradient(to bottom, #0f172a, #1e293b);
+    border: 3px solid rgba(255, 255, 255, 0.15);
+    border-bottom: none;
+    border-radius: 25px 25px 0 0;
+    box-shadow: 
+        inset 0 10px 20px rgba(0,0,0,0.8),
+        0 -10px 30px rgba(245, 158, 11, 0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 30;
+}
+
+.jar-neck-glow {
+    width: 65%;
+    height: 4px;
+    background: #f59e0b;
+    filter: blur(6px);
+    animation: neon-pulse 1s infinite alternate;
+}
+
+.jar-body-sphere {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.1) 0%, transparent 80%);
+    border: 5px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        inset 0 0 140px rgba(0,0,0,1),
+        inset 0 0 60px rgba(245, 158, 11, 0.08),
+        0 60px 100px rgba(0,0,0,1);
+    overflow: visible; 
+    backdrop-filter: blur(2px);
+}
+
+@keyframes neon-pulse {
+    0% { opacity: 0.4; transform: scaleX(0.9); }
+    100% { opacity: 1; transform: scaleX(1.1); }
+}
+
+/* THE BALLS - 3D PLASTIC LOOK */
+.lottery-ball-3d {
+    position: absolute;
+    width: clamp(30px, 6.5vw, 46px);
+    height: clamp(30px, 6.5vw, 46px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        inset -8px -8px 16px rgba(0,0,0,0.8),
+        inset 5px 5px 10px rgba(255,255,255,0.6),
+        0 15px 30px rgba(0,0,0,0.7);
+    background: radial-gradient(circle at 30% 30%, #fff 0%, var(--ball-color, #fff) 60%, #000 100%);
+    z-index: 44; /* Just below the front glass highlights but above the pipe body */
+    transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.ball-text-3d {
+    font-size: clamp(12px, 3.5vw, 20px);
+    font-family: 'Russo One', sans-serif;
+    font-weight: 900;
+    color: #000;
+    line-height: 1;
+    transform: rotate(-12deg);
+    text-shadow: 0 1px 1px rgba(255,255,255,0.3);
+}
+
+/* TURBULENT VORTEX MIXING */
+@keyframes ball-vortex-move {
+    0% { transform: rotate(0deg) translate(var(--radius)) rotate(0deg) scale(0.8); opacity: 0.6; }
+    25% { transform: rotate(90deg) translate(calc(var(--radius) * 1.2)) rotate(-90deg) scale(1.1); opacity: 1; }
+    50% { transform: rotate(180deg) translate(var(--radius)) rotate(-180deg) scale(0.9); opacity: 0.8; }
+    75% { transform: rotate(270deg) translate(calc(var(--radius) * 0.8)) rotate(-270deg) scale(1.2); opacity: 1; }
+    100% { transform: rotate(360deg) translate(var(--radius)) rotate(-360deg) scale(0.8); opacity: 0.6; }
+}
+
+.ball-vortex {
+    animation: ball-vortex-move var(--speed) infinite linear;
+    animation-delay: var(--delay);
+}
+
+/* THE REVEAL DISPLAY BOX */
+.result-display-box {
+    position: absolute;
+    bottom: 2%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    height: 90px;
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(2, 6, 23, 0.98) 100%);
+    backdrop-filter: blur(30px);
+    border: 3px solid #f59e0b;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    box-shadow: 
+        0 20px 50px rgba(0,0,0,1), 
+        0 0 35px rgba(245, 158, 11, 0.2),
+        inset 0 0 30px rgba(0,0,0,0.85);
+}
+
+.result-glow-text {
+    font-family: 'Russo One', sans-serif;
+    font-weight: 900;
+    font-size: clamp(80px, 18vw, 130px);
+    background: linear-gradient(to bottom, #fff 20%, #f59e0b 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 40px rgba(245, 158, 11, 0.6));
+    animation: cinematic-reveal 1.5s cubic-bezier(0.17, 0.89, 0.32, 1.28) forwards;
+}
+
+@keyframes cinematic-reveal {
+    0% { transform: scale(0.3) translateY(40px); opacity: 0; filter: blur(15px) brightness(3); }
+    100% { transform: scale(1) translateY(0); opacity: 1; filter: blur(0) brightness(1); }
+}
+
+/* FINAL REVEAL IMPACT */
+.reveal-slam-bg {
+    background: radial-gradient(circle at center, rgba(245, 158, 11, 0.15) 0%, #000 80%);
+}
+
+.animate-result-slam-3d {
+    animation: result-slam-3d 1.2s cubic-bezier(0.1, 0.9, 0.2, 1.1) forwards;
+}
+
+@keyframes result-slam-3d {
+    0% { transform: perspective(2500px) translateZ(1500px) rotateX(30deg); opacity: 0; filter: brightness(4); }
+    100% { transform: perspective(2500px) translateZ(0) rotateX(0deg); opacity: 1; filter: brightness(1); }
+}
+
+.gold-shimmer {
+    background: linear-gradient(
+        90deg, 
+        rgba(255,255,255,0) 0%, 
+        rgba(255,255,255,0.9) 50%, 
+        rgba(255,255,255,0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite linear;
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.animate-fade-in {
+    animation: fade-in 1s ease-out forwards;
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* GLASS PIPE SHINE */
+.glass-pipe-highlight {
+    mix-blend-mode: overlay;
+    filter: blur(2px);
+    animation: pipe-shimmer 4s infinite linear;
+}
+
+@keyframes pipe-shimmer {
+    0% { opacity: 0.3; }
+    50% { opacity: 0.8; }
+    100% { opacity: 0.3; }
+}
+
+/* --- BROADCAST SIMULATOR OVERLAYS & LIVE EFFECTS --- */
+
+/* CRT SCANLINE SHIELD */
+.live-scanlines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.45) 50%
+    );
+    background-size: 100% 4px;
+    z-index: 10050;
+    pointer-events: none;
+    opacity: 0.35;
+}
+
+/* ANALOG CHROMATIC SEPARATION ON ACTIVE STREAM */
+.stream-crt-chroma {
+    position: relative;
+}
+.stream-crt-chroma::after {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: radial-gradient(circle, rgba(14,24,41,0) 60%, rgba(0,0,0,0.8) 100%);
+    pointer-events: none;
+    z-index: 10010;
+}
+
+/* BOUNCING EQUALIZER WAVEFORM CARDS */
+@keyframes audio-bounce-bar {
+    0%, 100% { height: 10%; }
+    50% { height: 100%; }
+}
+
+.wave-bar {
+    width: 3px;
+    background: #f59e0b;
+    border-radius: 99px;
+    animation: audio-bounce-bar var(--duration) ease-in-out infinite;
+    animation-delay: var(--delay);
+}
+
+/* BROADCAST HEADS-UP OVERLAYS */
+@keyframes rec-pulse {
+    0% { opacity: 0.2; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1.1); }
+}
+
+.live-indicator-pulse {
+    animation: rec-pulse 0.8s infinite alternate ease-in-out;
+}
+
+/* CHAT BOX TICKERS */
+@keyframes feed-comment-slide {
+    0% { transform: translateY(30px); opacity: 0; }
+    15% { transform: translateY(0); opacity: 1; }
+    85% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-30px); opacity: 0; }
+}
+
+.chat-bubble-animate {
+    animation: feed-comment-slide 4s infinite ease-in-out;
+}
+
+/* HORIZONTAL MARQUEE/NEWS TICKER */
+@keyframes ticker-slide {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+}
+
+.news-marquee-content {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker-slide 28s infinite linear;
+}
+
+/* presenter mouth bounce synced with artificial talking */
+@keyframes lip-talk {
+    0%, 100% { transform: scaleY(0.1); }
+    30% { transform: scaleY(1); }
+    50% { transform: scaleY(0.4); }
+    80% { transform: scaleY(0.8); }
+}
+
+.presenter-mouth {
+    transform-origin: center;
+    animation: lip-talk var(--speech-speed, 0.25s) infinite ease-in-out;
+}
+
+/* Ball orbit inside the mixing chamber */
+@keyframes orbit {
+  from { transform: rotate(var(--delay, 0s)) translateX(var(--radius, 60px)) rotate(0deg); }
+  to   { transform: rotate(calc(var(--delay, 0s) + 1turn)) translateX(var(--radius, 60px)) rotate(-1turn); }
+}
+
+.animate-orbit {
+  animation: orbit var(--speed, 0.3s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+/* 3-second hype progress bar & reveal burst */
+@keyframes hype-progress {
+  from { width: 0%; }
+  to   { width: 100%; }
+}
+
+.animate-hype-progress {
+  animation: hype-progress 3s linear forwards;
+}
+
+@keyframes hype-ring-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-hype-ring {
+  animation: hype-ring-spin 1.8s linear infinite;
+}
+
+@keyframes reveal-pop {
+  0%   { transform: scale(0.35); opacity: 0; filter: blur(12px) brightness(2); }
+  65%  { transform: scale(1.08); opacity: 1; filter: blur(0) brightness(1.15); }
+  100% { transform: scale(1); opacity: 1; filter: blur(0) brightness(1); }
+}
+
+.animate-reveal-pop {
+  animation: reveal-pop 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
